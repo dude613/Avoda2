@@ -13,6 +13,6 @@ export default [
 	...pluginVue.configs['flat/essential'],
 	{ files: ['**/*.vue'], languageOptions: { parserOptions: { parser: tseslint.parser } } },
 	{
-		ignores: ['node_modules/', 'dist/', '.nuxt/', '*.config.js']
+		ignores: ['node_modules/', 'dist/', '.nuxt/', '*.config.js', '.output/']
 	}
 ];
