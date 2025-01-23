@@ -17,7 +17,7 @@ export default [
 	},
 	{
 		rules: {
-			'vue/multi-word-component-names': 'warn',
+			'vue/multi-word-component-names': 'off',
 			'vue/no-v-html': 'warn',
 			'vue/component-tags-order': [
 				'error',
@@ -28,7 +28,9 @@ export default [
 			'@typescript-eslint/no-explicit-any': 'warn',
 			'@typescript-eslint/no-explicit-any': 'off', // Allow the use of `any` type
 			'@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }], // Ignore unused variables starting with "_"
-			'nuxt/no-cjs-in-config': 'off'
+			'nuxt/no-cjs-in-config': 'off',
+			'nuxt/no-undef': 'off',
+			'no-undef': 'off'
 		}
 	}
 ];
