@@ -1,8 +1,8 @@
 <template>
-	<div>
-		<app-header />
-		<main>
-			<slot />
-		</main>
-	</div>
+  <div>
+    <app-header />
+    <main>
+      <slot />
+    </main>
+  </div>
 </template>
