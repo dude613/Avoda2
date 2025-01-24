@@ -27,6 +27,17 @@ const marketing_content = [
       'Create and manage job postings with Caliber6, streamlining the application process.',
   },
 ];
+const modelValue = ref<string>('');
+
+const updateEmailModelValue = (e: string) => {
+  modelValue.value = e;
+};
+
+const updatePasswordModelValue = (e: string) => {
+  modelValue.value = e;
+};
+
+const myValue = useLocalStorage('myKey', 0);
 </script>
 
 <template>
@@ -58,5 +69,35 @@ const marketing_content = [
         <p class="text-sm">{{ content.description }}</p>
       </div>
     </div>
+  </section>
+
+  <section class="flex justify-center mt-6">
+    <form class="w-full md:w-1/3 p-5 [&>*:not(:last-child)]:mb-5">
+      <p class="font-md capitalize text-lg">authentication</p>
+      <form-app-input
+        inputLabel="email"
+        id="email"
+        inputType="email"
+        v-model="modelValue"
+        @update:model-value="updateEmailModelValue"
+        placeholder="johndoe@email.com"
+      />
+
+      <form-app-input
+        inputLabel="password"
+        id="password"
+        placeholder="Enter Password"
+        inputType="password"
+        v-model="modelValue"
+        @update:model-value="updatePasswordModelValue"
+      />
+
+      <app-button
+        text="sign in"
+        variant="tertiary"
+        @click.prevent="myValue++"
+        class="min-w-full"
+      />
+    </form>
   </section>
 </template>
