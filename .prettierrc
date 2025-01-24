@@ -1,11 +1,11 @@
 {
-	"arrowParens": "always",
-	"useTabs": true,
+	"htmlWhitespaceSensitivity": "css",
 	"singleQuote": true,
-	"trailingComma": "none",
-	"printWidth": 100,
-	"plugins": [],
-	"vueIndentScriptAndStyle": true,
+	"arrowParens": "always",
+	"semi": true,
+	"trailingComma": "es5",
+	"bracketSpacing": true,
+	"bracketSameLine": false,
 	"overrides": [
 		{
 			"files": "*.vue",
