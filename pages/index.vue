@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { createClient } from '@supabase/supabase-js';
+const runTimeConfig = useRuntimeConfig();
+
 useHead({
   title: 'Caliber6 | Employment Management System',
   meta: [
@@ -9,6 +12,14 @@ useHead({
     },
   ],
 });
+
+const supabase = createClient(
+  runTimeConfig.public.SUPABASE_PROJECT_URL.replace(
+    '<project>',
+    runTimeConfig.public.PROJECT_NAME
+  ),
+  runTimeConfig.public.SUPABASE_ANON_KEY
+);
 
 const marketing_content = [
   {
@@ -27,17 +38,26 @@ const marketing_content = [
       'Create and manage job postings with Caliber6, streamlining the application process.',
   },
 ];
-const modelValue = ref<string>('');
+
+const email = ref<string>('');
+const password = ref<string>('');
 
 const updateEmailModelValue = (e: string) => {
-  modelValue.value = e;
+  email.value = e;
 };
 
 const updatePasswordModelValue = (e: string) => {
-  modelValue.value = e;
+  password.value = e;
 };
 
-const myValue = useLocalStorage('myKey', 0);
+const loginWithPassword = async () => {
+  const data = await supabase.auth.signInWithPassword({
+    email: email.value,
+    password: password.value,
+  });
+
+  console.log(data.data);
+};
 </script>
 
 <template>
@@ -78,7 +98,7 @@ const myValue = useLocalStorage('myKey', 0);
         inputLabel="email"
         id="email"
         inputType="email"
-        v-model="modelValue"
+        v-model="email"
         @update:model-value="updateEmailModelValue"
         placeholder="johndoe@email.com"
       />
@@ -88,14 +108,14 @@ const myValue = useLocalStorage('myKey', 0);
         id="password"
         placeholder="Enter Password"
         inputType="password"
-        v-model="modelValue"
+        v-model="password"
         @update:model-value="updatePasswordModelValue"
       />
 
       <app-button
         text="sign in"
         variant="tertiary"
-        @click.prevent="myValue++"
+        @click.prevent="loginWithPassword"
         class="min-w-full"
       />
     </form>
