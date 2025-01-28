@@ -9,7 +9,6 @@ import { AuthCredentialsDTO } from './dto/auth-credentials.dto';
 import { CreateUserDTO } from './dto/create-user.dto';
 
 import { RefreshTokenStrategy } from './refresh-token.guard';
-import { AccessTokenStrategy } from './access-token.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -21,7 +20,6 @@ export class AuthController {
   }
 
   @Post('signup-with-password')
-  @UseGuards(AccessTokenStrategy)
   signupWithPassword(@Body() body: CreateUserDTO) {
     return this.authService.signupWithPassword(body);
   }

@@ -1,16 +1,10 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Organization } from './organization.entity';
+import { MEMBER_PERMISSIONS } from '@/enums/permissions.enum';
 
 enum MEMBER_ROLES {
-  'MEMBER',
-  'OWNER',
-}
-
-enum MEMBER_PERMISSIONS {
-  'READ:TASK',
-  'WRITE:UPDATE',
-  'DELETE:TASK',
-  'UPDATE:TASK',
+  MEMBER = 'MEMBER',
+  OWNER = 'OWNER',
 }
 
 @Entity('org_member')
@@ -31,9 +25,8 @@ export class OrgMember {
   role: MEMBER_ROLES;
 
   @Column({
-    type: 'enum',
-    enum: MEMBER_PERMISSIONS,
-    default: `${MEMBER_PERMISSIONS['READ:TASK']}`,
+    type: 'varchar',
+    default: `${MEMBER_PERMISSIONS.READ_TASK}`,
   })
-  permissions: MEMBER_PERMISSIONS;
+  permissions: string;
 }
