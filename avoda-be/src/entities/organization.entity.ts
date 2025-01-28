@@ -17,7 +17,7 @@ export class Organization {
   id: string;
 
   // An organization must belong to a user
-  @ManyToOne(() => User, (user) => user.organizations)
+  @ManyToOne(() => User, (user) => user.organizations, { onDelete: 'CASCADE' })
   owner_id: User;
 
   @OneToMany(() => Project, (project) => project.organization_id)
@@ -28,6 +28,10 @@ export class Organization {
 
   @Column({ nullable: true })
   rate: number;
+
+  // 1 stands for true, 0 stands for false
+  @Column({ default: 1, type: 'smallint' })
+  isDefaultOrg: number;
 
   @CreateDateColumn()
   createdAt: Date;

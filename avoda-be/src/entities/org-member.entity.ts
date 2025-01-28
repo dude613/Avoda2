@@ -1,7 +1,17 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Organization } from './organization.entity';
 
-type MemberRole = 'member' | 'owner';
+enum MEMBER_ROLES {
+  'MEMBER',
+  'OWNER',
+}
+
+enum MEMBER_PERMISSIONS {
+  'READ:TASK',
+  'WRITE:UPDATE',
+  'DELETE:TASK',
+  'UPDATE:TASK',
+}
 
 @Entity('org_member')
 export class OrgMember {
@@ -14,12 +24,16 @@ export class OrgMember {
   @Column()
   user_id: string;
 
-  @ManyToOne(() => Organization, (org) => org.id)
+  @ManyToOne(() => Organization, (org) => org.id, { onDelete: 'CASCADE' })
   organization_id: Organization;
 
-  @Column()
-  role: MemberRole;
+  @Column({ default: MEMBER_ROLES.MEMBER, type: 'enum', enum: MEMBER_ROLES })
+  role: MEMBER_ROLES;
 
-  @Column()
-  permissions: string;
+  @Column({
+    type: 'enum',
+    enum: MEMBER_PERMISSIONS,
+    default: `${MEMBER_PERMISSIONS['READ:TASK']}`,
+  })
+  permissions: MEMBER_PERMISSIONS;
 }
