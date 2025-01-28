@@ -11,14 +11,19 @@ import { UsersModule } from '@/users/users.module';
 import { UserService } from '@/users/users.service';
 import { userProviders } from '@/users/users.provider';
 
+import { PermissionsGuard } from '@/shared/guards/permissions.guard';
+import { organizationProvider } from '@/organizations/organizations.provider';
+
 @Module({
   imports: [UsersModule, DatabaseModule],
   providers: [
     AuthService,
     AccessTokenStrategy,
+    PermissionsGuard,
     UserService,
     ...userProviders,
     ...databaseProviders,
+    ...organizationProvider,
   ],
   controllers: [AuthController],
 })
