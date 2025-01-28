@@ -21,5 +21,5 @@ export class OrgMember {
   role: MemberRole;
 
   @Column()
-  permissions: string[];
+  permissions: string;
 }
