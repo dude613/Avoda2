@@ -2,7 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   HttpStatus,
-  UnauthorizedException,
+  Injectable,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -10,45 +10,58 @@ import { Request } from 'express';
 
 import { AppError } from '@/shared/appError.util';
 
-type TOKEN_SECRET = 'JWT_ACCESS_SECRET' | 'JWT_REFRESH_SECRET';
+import { UserService } from '@/users/users.service';
 
-type SECRET_CONFIG = {
-  configService: ConfigService;
-  secretType: TOKEN_SECRET;
-  jwtService: JwtService;
-};
+import { JWTPayload } from '../jwt-payload.type';
 
-export class BaseStrategy implements CanActivate {
-  constructor(private readonly config: SECRET_CONFIG) {}
+@Injectable()
+export abstract class BaseAuthStrategy implements CanActivate {
+  constructor(
+    protected readonly configService: ConfigService,
+    protected readonly jwtService: JwtService,
+    protected readonly userService: UserService,
+  ) {}
+
+  protected abstract getSecretKey(): string;
+  protected abstract handleValidatedUser(user: any, request: Request): void;
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<Request>();
-    const token = this.extractTokenFromHeader(request);
-    if (!token) {
-      throw new AppError('No token provided', HttpStatus.UNAUTHORIZED);
-    }
-    try {
-      // This will be checked at runtime
-      const secret = this.config.configService.get<string>(
-        this.config.secretType,
-      );
+    const request = this.getRequest(context);
+    const token = this.extractToken(request);
+    const payload = await this.verifyToken(token);
+    const user = await this.validateUser(payload);
 
-      const payload = await this.config.jwtService.verifyAsync(token, {
-        secret,
-      });
-
-      // 💡 We're assigning the payload to the request object here
-      // so that we can access it in our route handlers
-      request['user'] = payload;
-    } catch {
-      throw new AppError('No token provided', HttpStatus.UNAUTHORIZED);
-    }
-
+    this.handleValidatedUser(user, request);
     return true;
   }
 
-  private extractTokenFromHeader(request: Request): string | undefined {
+  private getRequest(context: ExecutionContext): Request {
+    return context.switchToHttp().getRequest<Request>();
+  }
+
+  private extractToken(request: Request): string {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+
+    if (!token || type !== 'Bearer') {
+      throw new AppError('Invalid or missing token', HttpStatus.UNAUTHORIZED);
+    }
+
+    return token;
+  }
+
+  private async verifyToken(token: string): Promise<JWTPayload> {
+    const secret = this.configService.get<string>(this.getSecretKey());
+
+    return await this.jwtService.verify(token, { secret });
+  }
+
+  private async validateUser(payload: JWTPayload) {
+    const user = await this.userService.getUserById(payload.sub);
+
+    if (!user) {
+      throw new AppError('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    return user;
   }
 }

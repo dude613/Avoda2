@@ -39,21 +39,7 @@ export class CreateUserDTO {
   email: string;
 
   @IsOptional()
-  @IsString({ message: '' })
-  deviceToken?: string;
-
-  @IsOptional()
   @IsDateString()
   @IsTrimmed()
   dob?: Date;
-
-  @IsOptional()
-  @IsString({ message: '' })
-  @IsTrimmed()
-  manager?: string;
-
-  @IsOptional()
-  @IsString({ message: '' })
-  @IsTrimmed()
-  department?: string;
 }

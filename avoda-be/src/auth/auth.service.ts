@@ -1,15 +1,21 @@
 import { Injectable, HttpStatus, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { AppError } from '@/shared/appError.util';
-import { USER_REPOSITORY } from '@/shared/constants/database.constants';
+import {
+  DATA_SOURCE,
+  USER_REPOSITORY,
+} from '@/shared/constants/database.constants';
 
 import { User } from '@/entities/user.entity';
+import { Organization } from '@/entities/organization.entity';
+import { OrgMember } from '@/entities/org-member.entity';
 
 import { JWTPayload } from '@/auth/jwt-payload.type';
+
 import { CreateUserDTO } from '@/auth/dto/create-user.dto';
 import { AuthCredentialsDTO } from '@/auth/dto/auth-credentials.dto';
 import { ForgotPasswordDto } from '@/auth/dto/forgot-password.dto';
@@ -19,29 +25,72 @@ export class AuthService {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: Repository<User>,
+    @Inject(DATA_SOURCE)
+    private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
   async signupWithPassword(createUserDto: CreateUserDTO) {
     // check if the user exists
-    const existingUser = await this.userRepository.findOne({
-      where: { email: createUserDto.email },
+    const existingUser = await this.userRepository.findOneBy({
+      email: createUserDto.email,
     });
 
-    if (existingUser) throw new AppError('', HttpStatus.CONFLICT);
+    if (existingUser)
+      throw new AppError(
+        'Cannot create user at this time. Please try again later.',
+        HttpStatus.CONFLICT,
+      );
 
     const salt = await bcrypt.genSalt();
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
 
-    const user = this.userRepository.create({
-      ...createUserDto,
-      password: hashedPassword,
-    });
+    const queryRunner = this.dataSource.createQueryRunner();
+    queryRunner.startTransaction();
 
-    await this.userRepository.save(user);
+    try {
+      // 1. Create the user
+      const user = queryRunner.manager.create(User, {
+        ...createUserDto,
+        first_name: createUserDto.firstName,
+        last_name: createUserDto.lastName,
+        password: hashedPassword,
+      });
 
-    return 'user created successfully';
+      await queryRunner.manager.save(user);
+
+      // 1a. Insert into the org table
+      const org = queryRunner.manager.create(Organization, {
+        name: `${createUserDto.firstName}-${createUserDto.lastName}-org`,
+        owner_id: user,
+      });
+
+      await queryRunner.manager.save(org);
+
+      // 1b. Add user as owner of default Org
+      const orgMember = queryRunner.manager.create(OrgMember, {
+        user_id: user.id,
+        organization_id: org,
+      });
+
+      await queryRunner.manager.save(orgMember);
+
+      await queryRunner.commitTransaction();
+
+      return 'user created successfully';
+    } catch {
+      // Don't commit anything to the database
+      await queryRunner.rollbackTransaction();
+
+      // throw the error so the AppError can catch it
+      throw new AppError(
+        'Cannot create user at this time!. Please try again',
+        HttpStatus.BAD_REQUEST,
+      );
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async loginWithPassword(authCredentialsDto: AuthCredentialsDTO) {
@@ -67,10 +116,8 @@ export class AuthService {
   }
 
   async refreshToken(id: string) {
-    const user = await this.userRepository.findOne({ where: { id } });
-
     const tokens = await this.generateTokens({
-      sub: user.id,
+      sub: id,
     });
     return { tokens };
   }

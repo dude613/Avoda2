@@ -1,31 +1,15 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, Req } from '@nestjs/common';
+import { Request } from 'express';
 
-import { JWTPayload } from '@/auth/jwt-payload.type';
-import { BaseStrategy } from '@/auth/strategies/base.strategy';
-import { UserService } from '@/users/users.service';
-
-import { AppError } from '@/shared/appError.util';
+import { BaseAuthStrategy } from './strategies/base.strategy';
 
 @Injectable()
-export class AccessTokenStrategy extends BaseStrategy {
-  constructor(
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly userService: UserService,
-  ) {
-    super({ configService, secretType: 'JWT_ACCESS_SECRET', jwtService });
+export class AccessTokenStrategy extends BaseAuthStrategy {
+  protected getSecretKey(): string {
+    return 'JWT_ACCESS_SECRET';
   }
 
-  public async validate(payload: JWTPayload) {
-    const { sub } = payload;
-
-    // find user using the provided token
-    const user = await this.userService.getUserById(sub);
-
-    if (!user) throw new AppError('No User Found', HttpStatus.NOT_FOUND);
-
-    return user;
+  protected handleValidatedUser(user: any, @Req() request: Request): void {
+    request['user'] = user;
   }
 }

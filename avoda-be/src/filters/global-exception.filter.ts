@@ -25,8 +25,6 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
 
     let data: { [x: string]: any } | undefined | string = undefined;
 
-    const errCode: string = err.code || false;
-
     if (err instanceof AppError) {
       switch (err.status) {
         case HttpStatus.BAD_REQUEST:

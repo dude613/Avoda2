@@ -1,8 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 
 import { User } from '@/entities/user.entity';
+
 import { USER_REPOSITORY } from '@/shared/constants/database.constants';
+import { AppError } from '@/shared/appError.util';
 
 @Injectable()
 export class UserService {
@@ -12,10 +14,11 @@ export class UserService {
   ) {}
 
   async getUserById(id: string) {
-    return {
-      sub: id,
-      name: 'John Doe',
-      email: '',
-    };
+    const user = this.userRepository.findOneBy({ id });
+
+    if (!user)
+      throw new AppError(`No user found with id: ${id}`, HttpStatus.NOT_FOUND);
+
+    return user;
   }
 }
