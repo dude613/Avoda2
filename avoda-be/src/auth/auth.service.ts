@@ -1,11 +1,11 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, HttpStatus, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { AppError } from '@/shared/appError.util';
+import { USER_REPOSITORY } from '@/shared/constants/database.constants';
 
 import { User } from '@/entities/user.entity';
 
@@ -17,7 +17,7 @@ import { ForgotPasswordDto } from '@/auth/dto/forgot-password.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
+    @Inject(USER_REPOSITORY)
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -63,7 +63,7 @@ export class AuthService {
       };
     }
 
-    throw new AppError('', HttpStatus.BAD_REQUEST);
+    throw new AppError('No user found!!', HttpStatus.BAD_REQUEST);
   }
 
   async refreshToken(id: string) {

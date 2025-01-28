@@ -13,6 +13,7 @@ import { GlobalExceptionsFilter } from '@/filters/global-exception.filter';
 
 import { Environment, validate } from '@/shared/environment.config';
 import { UserModule } from './user/user.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -20,35 +21,9 @@ import { UserModule } from './user/user.module';
     JwtModule.register({
       global: true,
     }),
-    TypeOrmModule.forRootAsync({
-      useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get<string>('DB_HOST'),
-        port: parseInt(configService.get<string>('DB_PORT')),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_NAME'),
-        synchronize:
-          configService.get<string>('NODE_ENV') !== Environment.PRODUCTION,
-        entities: [`${__dirname}/**/*.entity.ts`],
-        migrationsRun:
-          configService.get<string>('NODE_ENV') === Environment.PRODUCTION,
-        logging:
-          configService.get<string>('NODE_ENV') !== Environment.PRODUCTION,
-        autoLoadEntities: true,
-        options: {
-          connectTimeout: parseInt(
-            configService.get<string>('DB_CONNECTION_TIMEOUT'),
-          ),
-        },
-        cli: {
-          migrationsDir: 'src/migrations',
-        },
-      }),
-      inject: [ConfigService],
-    }),
     AuthModule,
     UserModule,
+    DatabaseModule,
   ],
   controllers: [],
   providers: [
