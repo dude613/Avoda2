@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { JWTPayload } from '@/auth/jwt-payload.type';
 import { BaseStrategy } from '@/auth/strategies/base.strategy';
-import { UserService } from '@/user/user.service';
+import { UserService } from '@/users/users.service';
 
 @Injectable()
 export class RefreshTokenStrategy extends BaseStrategy {

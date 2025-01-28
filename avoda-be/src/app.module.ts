@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 
 import { ResponseInterceptor } from '@/interceptors/response.interceptor';
@@ -11,9 +10,9 @@ import { ValidationPipe } from '@/pipes/validation.pipe';
 
 import { GlobalExceptionsFilter } from '@/filters/global-exception.filter';
 
-import { Environment, validate } from '@/shared/environment.config';
-import { UserModule } from './user/user.module';
-import { DatabaseModule } from './database/database.module';
+import { validate } from '@/shared/environment.config';
+import { UsersModule } from './users/users.module';
+import { OrganizationsModule } from './organizations/organizations.module';
 
 @Module({
   imports: [
@@ -22,8 +21,8 @@ import { DatabaseModule } from './database/database.module';
       global: true,
     }),
     AuthModule,
-    UserModule,
-    DatabaseModule,
+    UsersModule,
+    OrganizationsModule,
   ],
   controllers: [],
   providers: [

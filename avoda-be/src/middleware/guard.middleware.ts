@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response, NextFunction } from 'express';
 
-import { UserService } from '@/user/user.service';
+import { UserService } from '@/users/users.service';
 
 import { JWTPayload } from '@/auth/jwt-payload.type';
 
