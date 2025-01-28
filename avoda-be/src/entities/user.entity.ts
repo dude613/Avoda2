@@ -15,11 +15,13 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
   @Column()
-  name: string;
+  first_name: string;
   @Column()
+  last_name: string;
+  @Column({ unique: true })
   email: string;
   @Column()
-  @Exclude({ toClassOnly: true })
+  @Exclude({ toPlainOnly: true })
   password: string;
 
   // One user can have many organizations.

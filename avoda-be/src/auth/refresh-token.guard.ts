@@ -1,25 +1,15 @@
 import { Injectable, Req } from '@nestjs/common';
 import { Request } from 'express';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 
-import { JWTPayload } from '@/auth/jwt-payload.type';
-import { BaseStrategy } from '@/auth/strategies/base.strategy';
-import { UserService } from '@/users/users.service';
+import { BaseAuthStrategy } from './strategies/base.strategy';
 
 @Injectable()
-export class RefreshTokenStrategy extends BaseStrategy {
-  constructor(
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly userService: UserService,
-  ) {
-    super({ configService, secretType: 'JWT_REFRESH_SECRET', jwtService });
+export class RefreshTokenStrategy extends BaseAuthStrategy {
+  protected getSecretKey(): string {
+    return 'JWT_REFRESH_SECRET';
   }
 
-  public async validate(payload: JWTPayload, @Req() req: Request) {
-    const refreshToken = req.get('Authorization').replace('Bearer', '').trim();
-
-    return { ...payload, refreshToken };
+  protected handleValidatedUser(user: any, request: Request): void {
+    request['user'] = user;
   }
 }
