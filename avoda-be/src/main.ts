@@ -45,6 +45,7 @@ async function bootstrap() {
     console.info('SIGTERM signal received. Shutting down...');
 
     await app.close();
+    process.exit(0);
   });
 
   process.on(Signals.SIGINT, async (err: any) => {
