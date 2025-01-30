@@ -15,11 +15,12 @@ export const databaseProviders = [
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
-        synchronize: config.get<string>('NODE_ENV') !== Environment.PRODUCTION,
+        synchronize: true,
         entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
-        migrationsRun:
-          config.get<string>('NODE_ENV') === Environment.PRODUCTION,
-        logging: config.get<string>('NODE_ENV') !== Environment.PRODUCTION,
+        migrationsRun: true,
+        migrations: [`${__dirname}/../../migrations/*{.ts,.js}`],
+
+        logging: true,
       });
 
       return dataSource.initialize();

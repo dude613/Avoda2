@@ -1,32 +1,45 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Organization } from './organization.entity';
-import { MEMBER_PERMISSIONS } from '@/enums/permissions.enum';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
-enum MEMBER_ROLES {
+import { Organization } from './organization.entity';
+import { PermissionEntity } from './permissions.entity';
+import { User } from './user.entity';
+
+enum USER_ROLES {
   MEMBER = 'MEMBER',
   OWNER = 'OWNER',
 }
 
-@Entity('org_member')
-export class OrgMember {
+@Entity('organization_member')
+export class OrganizationMembers {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => OrgMember, (orgMember) => orgMember.organization_id)
-  members: string;
+  @ManyToOne(() => User, (user) => user.organizations, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
-  @Column()
-  user_id: string;
+  @ManyToOne(() => Organization, (org) => org.members, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 
-  @ManyToOne(() => Organization, (org) => org.id, { onDelete: 'CASCADE' })
-  organization_id: Organization;
+  @OneToMany(() => PermissionEntity, (permission) => permission.member)
+  @JoinColumn({ name: 'permissions_id' })
+  permissions: PermissionEntity[];
 
-  @Column({ default: MEMBER_ROLES.MEMBER, type: 'enum', enum: MEMBER_ROLES })
-  role: MEMBER_ROLES;
+  @Column({ default: USER_ROLES.OWNER, type: 'enum', enum: USER_ROLES })
+  role: USER_ROLES;
 
-  @Column({
-    type: 'varchar',
-    default: `${MEMBER_PERMISSIONS.READ_TASK}`,
-  })
-  permissions: string;
+  @CreateDateColumn()
+  createdAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

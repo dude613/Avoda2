@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { AccessTokenStrategy } from './access-token.guard';
+import { AuthGuard } from './access-token.guard';
 
 import { DatabaseModule } from '@/database/database.module';
 import { databaseProviders } from '@/database/database.provider';
@@ -18,7 +18,7 @@ import { organizationProvider } from '@/organizations/organizations.provider';
   imports: [UsersModule, DatabaseModule],
   providers: [
     AuthService,
-    AccessTokenStrategy,
+    AuthGuard,
     PermissionsGuard,
     UserService,
     ...userProviders,

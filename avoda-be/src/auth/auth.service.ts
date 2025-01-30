@@ -12,13 +12,16 @@ import {
 
 import { User } from '@/entities/user.entity';
 import { Organization } from '@/entities/organization.entity';
-import { OrgMember } from '@/entities/org-member.entity';
+import { OrganizationMembers } from '@/entities/org-member.entity';
+import { PermissionEntity } from '@/entities/permissions.entity';
 
 import { JWTPayload } from '@/auth/jwt-payload.type';
 
 import { CreateUserDTO } from '@/auth/dto/create-user.dto';
 import { AuthCredentialsDTO } from '@/auth/dto/auth-credentials.dto';
 import { ForgotPasswordDto } from '@/auth/dto/forgot-password.dto';
+
+import { USER_PERMISSIONS } from '@/enums/permissions.enum';
 
 @Injectable()
 export class AuthService {
@@ -61,20 +64,28 @@ export class AuthService {
       await queryRunner.manager.save(user);
 
       // 1a. Insert into the org table
-      const org = queryRunner.manager.create(Organization, {
+      const doc = queryRunner.manager.create(Organization, {
         name: `${createUserDto.firstName}-${createUserDto.lastName}-org`,
-        owner_id: user,
+        createdBy: user,
       });
 
-      await queryRunner.manager.save(org);
+      const savedOrg = await queryRunner.manager.save(doc);
 
       // 1b. Add user as owner of default Org
-      const orgMember = queryRunner.manager.create(OrgMember, {
-        user_id: user.id,
-        organization_id: org,
+      const createMember = queryRunner.manager.create(OrganizationMembers, {
+        user: { id: user.id },
+        organization: { id: savedOrg.id },
       });
 
-      await queryRunner.manager.save(orgMember);
+      const savedOrgMember = await queryRunner.manager.save(createMember);
+
+      // 2a Create permission
+      const userPermissions = queryRunner.manager.create(PermissionEntity, {
+        member: { id: savedOrgMember.id },
+        permission: USER_PERMISSIONS.ROOT_PERMISSION,
+      });
+
+      await queryRunner.manager.save(userPermissions);
 
       await queryRunner.commitTransaction();
 
@@ -131,7 +142,15 @@ export class AuthService {
     // If no user is found, YELL!!!
     if (!user) throw new AppError('', HttpStatus.BAD_REQUEST);
 
-    return '';
+    // TODO: Add meaningful success message
+    return 'Put something here later';
+  }
+
+  async inviteMember(data: any, user: Partial<User>) {
+    // Get the user who is sending the invite
+
+    // send email to the person being invited
+    return 'invite sent';
   }
 
   private async generateTokens(auth: JWTPayload) {
