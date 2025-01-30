@@ -4,7 +4,7 @@ import { Request } from 'express';
 import { BaseAuthStrategy } from './strategies/base.strategy';
 
 @Injectable()
-export class AccessTokenStrategy extends BaseAuthStrategy {
+export class AuthGuard extends BaseAuthStrategy {
   protected getSecretKey(): string {
     return 'JWT_ACCESS_SECRET';
   }
