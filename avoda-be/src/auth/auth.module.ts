@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { AuthGuard } from './access-token.guard';
+import { EmailModule } from '@/email/email.module';
 
 import { DatabaseModule } from '@/database/database.module';
 import { databaseProviders } from '@/database/database.provider';
@@ -11,19 +9,21 @@ import { UsersModule } from '@/users/users.module';
 import { UserService } from '@/users/users.service';
 import { userProviders } from '@/users/users.provider';
 
-import { PermissionsGuard } from '@/shared/guards/permissions.guard';
 import { organizationProvider } from '@/organizations/organizations.provider';
+import { invitesProvider } from '@/invites/invites.provider';
+
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
 
 @Module({
-  imports: [UsersModule, DatabaseModule],
+  imports: [UsersModule, DatabaseModule, EmailModule],
   providers: [
     AuthService,
-    AuthGuard,
-    PermissionsGuard,
     UserService,
     ...userProviders,
     ...databaseProviders,
     ...organizationProvider,
+    ...invitesProvider,
   ],
   controllers: [AuthController],
 })

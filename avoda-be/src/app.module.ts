@@ -15,6 +15,8 @@ import { AuthGuard } from '@/auth/access-token.guard';
 import { UsersModule } from '@/users/users.module';
 
 import { OrganizationsModule } from '@/organizations/organizations.module';
+import { EmailModule } from '@/email/email.module';
+import { InvitesModule } from '@/invites/invites.module';
 
 @Module({
   imports: [
@@ -25,8 +27,9 @@ import { OrganizationsModule } from '@/organizations/organizations.module';
     AuthModule,
     UsersModule,
     OrganizationsModule,
+    EmailModule,
+    InvitesModule,
   ],
-  controllers: [],
   providers: [
     {
       provide: APP_PIPE,

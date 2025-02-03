@@ -12,6 +12,7 @@ import {
 import { Organization } from './organization.entity';
 import { PermissionEntity } from './permissions.entity';
 import { User } from './user.entity';
+import { InvitesRepository } from './invites.entity';
 
 enum USER_ROLES {
   MEMBER = 'MEMBER',
@@ -34,6 +35,9 @@ export class OrganizationMembers {
   @OneToMany(() => PermissionEntity, (permission) => permission.member)
   @JoinColumn({ name: 'permissions_id' })
   permissions: PermissionEntity[];
+
+  @OneToMany(() => InvitesRepository, (invite) => invite.invitedBy)
+  invites: InvitesRepository[];
 
   @Column({ default: USER_ROLES.OWNER, type: 'enum', enum: USER_ROLES })
   role: USER_ROLES;

@@ -38,7 +38,7 @@ export class PermissionsGuard implements CanActivate {
     if (!user || !orgId) return false;
 
     // Fetch the user's permissions for the organization
-    const orgMember = await this.getOrganizations(user.id, orgId);
+    const orgMember = await this.getPermissions(user.id, orgId);
 
     // If no org member found or no permissions, deny access
     if (orgMember && !orgMember.length) return false;
@@ -55,7 +55,7 @@ export class PermissionsGuard implements CanActivate {
     return hasPermission;
   }
 
-  private async getOrganizations(userId: string, orgId: string) {
+  private async getPermissions(userId: string, orgId: string) {
     return this.permissionsRepository
       .createQueryBuilder('permission')
       .innerJoin('permission.member', 'member')
