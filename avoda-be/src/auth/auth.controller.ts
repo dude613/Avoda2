@@ -4,7 +4,9 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 
@@ -24,6 +26,7 @@ import { AuthService } from './auth.service';
 
 import { AuthCredentialsDTO } from './dto/auth-credentials.dto';
 import { CreateUserDTO } from './dto/create-user.dto';
+import { InviteMembersDTO } from './dto/invite-members.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -48,16 +51,17 @@ export class AuthController {
     return this.authService.refreshToken(user.id);
   }
 
-  @Post('/:id/invite')
+  @Put('/:id/invite')
   @UseGuards(PermissionsGuard)
   @RequirePermissions(
     USER_PERMISSIONS.INVITE_USER,
     USER_PERMISSIONS.ROOT_PERMISSION,
   )
   inviteMember(
-    @Body() data: { email: string; organization_id: string },
+    @Param('id') id: string,
+    @Body() data: InviteMembersDTO,
     @CurrentUser() user: Partial<User>,
   ) {
-    return this.authService.inviteMember(data, user);
+    return this.authService.inviteMember(data, id, user);
   }
 }

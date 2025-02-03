@@ -1,12 +1,13 @@
 import { Injectable, HttpStatus, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, QueryRunner, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { AppError } from '@/shared/appError.util';
 import {
   DATA_SOURCE,
+  INVITES_REPOSITORY,
   USER_REPOSITORY,
 } from '@/shared/constants/database.constants';
 
@@ -14,10 +15,14 @@ import { User } from '@/entities/user.entity';
 import { Organization } from '@/entities/organization.entity';
 import { OrganizationMembers } from '@/entities/org-member.entity';
 import { PermissionEntity } from '@/entities/permissions.entity';
+import { InvitesRepository } from '@/entities/invites.entity';
 
 import { JWTPayload } from '@/auth/jwt-payload.type';
 
+import { EmailService } from '@/email/nodemailer.service';
+
 import { CreateUserDTO } from '@/auth/dto/create-user.dto';
+import { InviteMembersDTO } from '@/auth/dto/invite-members.dto';
 import { AuthCredentialsDTO } from '@/auth/dto/auth-credentials.dto';
 import { ForgotPasswordDto } from '@/auth/dto/forgot-password.dto';
 
@@ -28,10 +33,13 @@ export class AuthService {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: Repository<User>,
+    @Inject(INVITES_REPOSITORY)
+    private readonly invitesRepository: Repository<InvitesRepository>,
     @Inject(DATA_SOURCE)
     private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
   async signupWithPassword(createUserDto: CreateUserDTO) {
     // check if the user exists
@@ -64,28 +72,21 @@ export class AuthService {
       await queryRunner.manager.save(user);
 
       // 1a. Insert into the org table
-      const doc = queryRunner.manager.create(Organization, {
-        name: `${createUserDto.firstName}-${createUserDto.lastName}-org`,
-        createdBy: user,
-      });
-
-      const savedOrg = await queryRunner.manager.save(doc);
+      const { id } = await this.createDefaultOrganization(
+        queryRunner,
+        createUserDto,
+        user,
+      );
 
       // 1b. Add user as owner of default Org
-      const createMember = queryRunner.manager.create(OrganizationMembers, {
-        user: { id: user.id },
-        organization: { id: savedOrg.id },
-      });
-
-      const savedOrgMember = await queryRunner.manager.save(createMember);
+      const savedOrgMember = await this.addDefaultOrgMember(
+        queryRunner,
+        id,
+        user,
+      );
 
       // 2a Create permission
-      const userPermissions = queryRunner.manager.create(PermissionEntity, {
-        member: { id: savedOrgMember.id },
-        permission: USER_PERMISSIONS.ROOT_PERMISSION,
-      });
-
-      await queryRunner.manager.save(userPermissions);
+      await this.createDefaultPermission(queryRunner, savedOrgMember.id);
 
       await queryRunner.commitTransaction();
 
@@ -96,7 +97,7 @@ export class AuthService {
 
       // throw the error so the AppError can catch it
       throw new AppError(
-        'Cannot create user at this time!. Please try again',
+        'Failed to create user at this time!. Please try again',
         HttpStatus.BAD_REQUEST,
       );
     } finally {
@@ -146,11 +147,73 @@ export class AuthService {
     return 'Put something here later';
   }
 
-  async inviteMember(data: any, user: Partial<User>) {
-    // Get the user who is sending the invite
+  //  TODO:: implement queueing system
+  async inviteMember(data: InviteMembersDTO, id: string, user: Partial<User>) {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    // Get the member who's doing the invite
+    const memberId = await queryRunner.manager.findOneBy(OrganizationMembers, {
+      user: { id: user.id },
+    });
+
+    const invites = data.emails.map((invite) => ({
+      email: invite,
+      organization: { id },
+      invitedBy: { id: memberId.id },
+    }));
+
+    const repo = this.invitesRepository.create(invites);
+
+    // save the invites to the invites table
+    await this.invitesRepository.save(repo);
 
     // send email to the person being invited
-    return 'invite sent';
+    await this.emailService.sendEmail({
+      to: [...data.emails],
+      text: 'invite testing...',
+      subject: 'Invite to your team',
+      from: user.email,
+    });
+
+    return 'Invite(s) sent';
+  }
+
+  private async createDefaultOrganization(
+    queryRunner: QueryRunner,
+    createUserDto: CreateUserDTO,
+    user: User,
+  ) {
+    const doc = queryRunner.manager.create(Organization, {
+      name: `${createUserDto.firstName}-${createUserDto.lastName}-org`,
+      createdBy: user,
+    });
+
+    return await queryRunner.manager.save(doc);
+  }
+
+  private async addDefaultOrgMember(
+    queryRunner: QueryRunner,
+    orgId: string,
+    user: User,
+  ) {
+    const createMember = queryRunner.manager.create(OrganizationMembers, {
+      user: { id: user.id },
+      organization: { id: orgId },
+    });
+
+    return await queryRunner.manager.save(createMember);
+  }
+
+  private async createDefaultPermission(
+    queryRunner: QueryRunner,
+    memberId: string,
+  ) {
+    const userPermissions = queryRunner.manager.create(PermissionEntity, {
+      member: { id: memberId },
+      permission: USER_PERMISSIONS.ROOT_PERMISSION,
+    });
+
+    return await queryRunner.manager.save(userPermissions);
   }
 
   private async generateTokens(auth: JWTPayload) {
@@ -160,7 +223,7 @@ export class AuthService {
         secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
       }),
       this.jwtService.signAsync(auth, {
-        // Access token will expire in 1week
+        // refresh token will expire in 1week
         expiresIn: 60 * 60 * 24 * 7,
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       }),

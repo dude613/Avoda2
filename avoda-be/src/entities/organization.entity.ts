@@ -12,6 +12,7 @@ import {
 import { User } from './user.entity';
 import { Project } from './project.entity';
 import { OrganizationMembers } from './org-member.entity';
+import { InvitesRepository } from './invites.entity';
 
 @Entity('organization')
 export class Organization {
@@ -35,6 +36,9 @@ export class Organization {
 
   @OneToMany(() => Project, (project) => project.organization_id)
   projects: Project[];
+
+  @OneToMany(() => InvitesRepository, (invites) => invites.organization)
+  invites: InvitesRepository[];
 
   // 1 stands for true, 0 stands for false
   @Column({ default: 1, type: 'smallint' })
