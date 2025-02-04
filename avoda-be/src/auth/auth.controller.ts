@@ -50,7 +50,7 @@ export class AuthController {
   refreshTokens(@CurrentUser() user: User) {
     return this.authService.refreshToken(user.id);
   }
-
+  π;
   @Put('/:id/invite')
   @UseGuards(PermissionsGuard)
   @RequirePermissions(

@@ -33,6 +33,15 @@ export class InvitesRepository {
   @Column()
   email: string;
 
+  @Column({ type: 'timestamp' })
+  expiresAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  revokedAt?: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  acceptedAt: Date;
+
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()

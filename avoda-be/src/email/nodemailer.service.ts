@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
+// import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Process, Processor } from '@nestjs/bull';
+import { Job } from 'bull';
 
 import * as nodemailer from 'nodemailer';
 import { MailOptions } from 'nodemailer/lib/json-transport';
@@ -7,13 +9,10 @@ import { MailOptions } from 'nodemailer/lib/json-transport';
 import * as pug from 'pug';
 import * as path from 'path';
 
-type TemplateEmail = {
-  template: string;
-  data: Record<string, any>;
-};
+import { TemplateEmail } from '@/@types/email.type';
 
-@Injectable()
-export class EmailService {
+@Processor('avoda-redis-email-queue')
+export class NodeMailerService {
   constructor(private configService: ConfigService) {}
 
   private createTransport() {
@@ -27,23 +26,20 @@ export class EmailService {
     });
   }
 
-  async sendTemplateEmail(
-    { data, template }: TemplateEmail,
-    mailOptions: MailOptions,
-  ) {
+  async sendTemplateEmail(job: Job<MailOptions & TemplateEmail>) {
     //Render the html for the email based on a pug template
-
-    const html = await this.renderTemplate(template, data);
+    const html = await this.renderTemplate(job.data.template, job.data.data);
 
     return await this.createTransport().sendMail({
       html,
-      ...mailOptions,
+      ...job.data,
     });
   }
 
-  async sendEmail(mailOptions: MailOptions) {
+  @Process()
+  async sendEmail(job: Job<MailOptions>) {
     return await this.createTransport().sendMail({
-      ...mailOptions,
+      ...job.data,
     });
   }
 
