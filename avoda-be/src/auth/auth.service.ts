@@ -19,7 +19,7 @@ import { InvitesRepository } from '@/entities/invites.entity';
 
 import { JWTPayload } from '@/auth/jwt-payload.type';
 
-import { EmailService } from '@/email/nodemailer.service';
+import { EmailService } from '@/email/email.service';
 
 import { CreateUserDTO } from '@/auth/dto/create-user.dto';
 import { InviteMembersDTO } from '@/auth/dto/invite-members.dto';
@@ -147,8 +147,9 @@ export class AuthService {
     return 'Put something here later';
   }
 
-  //  TODO:: implement queueing system
   async inviteMember(data: InviteMembersDTO, id: string, user: Partial<User>) {
+    const TOKEN_EXPIRATION_TIME = 60 * 60 * 24 * 3 * 1000;
+
     const queryRunner = this.dataSource.createQueryRunner();
 
     // Get the member who's doing the invite
@@ -160,19 +161,39 @@ export class AuthService {
       email: invite,
       organization: { id },
       invitedBy: { id: memberId.id },
+      expiresAt: new Date(Date.now() + TOKEN_EXPIRATION_TIME),
     }));
 
     const repo = this.invitesRepository.create(invites);
 
     // save the invites to the invites table
-    await this.invitesRepository.save(repo);
+    const savedInvites = await this.invitesRepository.save(repo);
+
+    const tokens = await Promise.all(
+      savedInvites.map(async (invite) => {
+        const token = await this.jwtService.signAsync(
+          { sub: invite.id, email: invite.email, organizationId: id },
+          {
+            // token should expire in one day
+            expiresIn: TOKEN_EXPIRATION_TIME,
+            secret: this.configService.get<string>('JWT_INVITE_TOKEN_SECRET'),
+          },
+        );
+
+        const url = `${this.configService.get<string>('FRONTEND_URL')}?token=${token}`;
+
+        return { email: invite.email, url };
+      }),
+    );
 
     // send email to the person being invited
-    await this.emailService.sendEmail({
-      to: [...data.emails],
-      text: 'invite testing...',
-      subject: 'Invite to your team',
-      from: user.email,
+    tokens.map(async (mail) => {
+      await this.emailService.sendEmailAsync({
+        to: mail.email,
+        text: `This is your invite token\n ${mail.url}`,
+        subject: 'Invite to your team',
+        from: user.email,
+      });
     });
 
     return 'Invite(s) sent';
