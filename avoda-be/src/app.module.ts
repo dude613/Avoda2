@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { BullModule } from '@nestjs/bull';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
@@ -17,7 +17,6 @@ import { UsersModule } from '@/users/users.module';
 
 import { OrganizationsModule } from '@/organizations/organizations.module';
 import { EmailModule } from '@/email/email.module';
-import { InvitesModule } from '@/invites/invites.module';
 
 @Module({
   imports: [
@@ -29,7 +28,6 @@ import { InvitesModule } from '@/invites/invites.module';
     UsersModule,
     OrganizationsModule,
     EmailModule,
-    InvitesModule,
     BullModule.forRootAsync({
       useFactory: () => ({
         redis: {

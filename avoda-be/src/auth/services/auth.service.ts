@@ -7,7 +7,6 @@ import * as bcrypt from 'bcrypt';
 import { AppError } from '@/shared/appError.util';
 import {
   DATA_SOURCE,
-  INVITES_REPOSITORY,
   USER_REPOSITORY,
 } from '@/shared/constants/database.constants';
 
@@ -15,14 +14,10 @@ import { User } from '@/entities/user.entity';
 import { Organization } from '@/entities/organization.entity';
 import { OrganizationMembers } from '@/entities/org-member.entity';
 import { PermissionEntity } from '@/entities/permissions.entity';
-import { InvitesRepository } from '@/entities/invites.entity';
 
 import { JWTPayload } from '@/auth/jwt-payload.type';
 
-import { EmailService } from '@/email/email.service';
-
 import { CreateUserDTO } from '@/auth/dto/create-user.dto';
-import { InviteMembersDTO } from '@/auth/dto/invite-members.dto';
 import { AuthCredentialsDTO } from '@/auth/dto/auth-credentials.dto';
 import { ForgotPasswordDto } from '@/auth/dto/forgot-password.dto';
 
@@ -33,13 +28,10 @@ export class AuthService {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: Repository<User>,
-    @Inject(INVITES_REPOSITORY)
-    private readonly invitesRepository: Repository<InvitesRepository>,
     @Inject(DATA_SOURCE)
     private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly emailService: EmailService,
   ) {}
   async signupWithPassword(createUserDto: CreateUserDTO) {
     // check if the user exists
@@ -145,58 +137,6 @@ export class AuthService {
 
     // TODO: Add meaningful success message
     return 'Put something here later';
-  }
-
-  async inviteMember(data: InviteMembersDTO, id: string, user: Partial<User>) {
-    const TOKEN_EXPIRATION_TIME = 60 * 60 * 24 * 3 * 1000;
-
-    const queryRunner = this.dataSource.createQueryRunner();
-
-    // Get the member who's doing the invite
-    const memberId = await queryRunner.manager.findOneBy(OrganizationMembers, {
-      user: { id: user.id },
-    });
-
-    const invites = data.emails.map((invite) => ({
-      email: invite,
-      organization: { id },
-      invitedBy: { id: memberId.id },
-      expiresAt: new Date(Date.now() + TOKEN_EXPIRATION_TIME),
-    }));
-
-    const repo = this.invitesRepository.create(invites);
-
-    // save the invites to the invites table
-    const savedInvites = await this.invitesRepository.save(repo);
-
-    const tokens = await Promise.all(
-      savedInvites.map(async (invite) => {
-        const token = await this.jwtService.signAsync(
-          { sub: invite.id, email: invite.email, organizationId: id },
-          {
-            // token should expire in one day
-            expiresIn: TOKEN_EXPIRATION_TIME,
-            secret: this.configService.get<string>('JWT_INVITE_TOKEN_SECRET'),
-          },
-        );
-
-        const url = `${this.configService.get<string>('FRONTEND_URL')}?token=${token}`;
-
-        return { email: invite.email, url };
-      }),
-    );
-
-    // send email to the person being invited
-    tokens.map(async (mail) => {
-      await this.emailService.sendEmailAsync({
-        to: mail.email,
-        text: `This is your invite token\n ${mail.url}`,
-        subject: 'Invite to your team',
-        from: user.email,
-      });
-    });
-
-    return 'Invite(s) sent';
   }
 
   private async createDefaultOrganization(

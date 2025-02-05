@@ -10,15 +10,18 @@ import { UserService } from '@/users/users.service';
 import { userProviders } from '@/users/users.provider';
 
 import { organizationProvider } from '@/organizations/organizations.provider';
-import { invitesProvider } from '@/invites/invites.provider';
+import { invitesProvider } from '@/auth/invites.provider';
 
-import { AuthService } from './auth.service';
+import { AuthService } from './services/auth.service';
+import { InvitesService } from './services/invites.service';
+
 import { AuthController } from './auth.controller';
 
 @Module({
   imports: [UsersModule, DatabaseModule, EmailModule],
   providers: [
     AuthService,
+    InvitesService,
     UserService,
     ...userProviders,
     ...databaseProviders,

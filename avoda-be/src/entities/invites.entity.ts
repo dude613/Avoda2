@@ -6,15 +6,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { INVITE_STATUS } from '@/shared/constants/invite-status.constants';
+
 import { Organization } from './organization.entity';
 import { OrganizationMembers } from './org-member.entity';
-
-enum INVITE_STATUS {
-  PENDING = 'pending',
-  ACCEPTED = 'accepted',
-  REJECTED = 'rejected',
-  CANCELLED = 'cancelled',
-}
 
 @Entity('invites')
 export class InvitesRepository {

@@ -22,15 +22,22 @@ import { User } from '@/entities/user.entity';
 
 import { RefreshTokenGuard } from './refresh-token.guard';
 
-import { AuthService } from './auth.service';
+import { AuthService } from './services/auth.service';
+import { InvitesService } from './services/invites.service';
+
+import { AuthGuard } from './access-token.guard';
 
 import { AuthCredentialsDTO } from './dto/auth-credentials.dto';
 import { CreateUserDTO } from './dto/create-user.dto';
+import { UpdateInviteDTO } from './dto/update-invite.dto';
 import { InviteMembersDTO } from './dto/invite-members.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly invitesService: InvitesService
+  ) {}
 
   @Public()
   @Post('/login-with-password')
@@ -50,18 +57,25 @@ export class AuthController {
   refreshTokens(@CurrentUser() user: User) {
     return this.authService.refreshToken(user.id);
   }
-  π;
+
   @Put('/:id/invite')
   @UseGuards(PermissionsGuard)
   @RequirePermissions(
     USER_PERMISSIONS.INVITE_USER,
-    USER_PERMISSIONS.ROOT_PERMISSION,
+    USER_PERMISSIONS.ROOT_PERMISSION
   )
   inviteMember(
     @Param('id') id: string,
     @Body() data: InviteMembersDTO,
-    @CurrentUser() user: Partial<User>,
+    @CurrentUser() user: Partial<User>
   ) {
-    return this.authService.inviteMember(data, id, user);
+    return this.invitesService.inviteMember(data, id, user);
+  }
+
+  @Post('/update-invite-status')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  updateInvite(@Body() body: UpdateInviteDTO) {
+    return this.invitesService.updateInvite(body);
   }
 }
