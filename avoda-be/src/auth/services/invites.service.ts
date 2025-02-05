@@ -112,7 +112,13 @@ export class InvitesService {
 
     await this.invitesRepository.update(
       { id: invite.id, organization: { id: decodedToken.organizationId } },
-      { status: data.status, acceptedAt: new Date(Date.now()) }
+      {
+        status: data.status,
+        acceptedAt:
+          data.status === INVITE_STATUS.ACCEPTED ? new Date(Date.now()) : null,
+        revokedAt:
+          data.status === INVITE_STATUS.REJECTED ? new Date(Date.now()) : null,
+      }
     );
 
     return 'Status updated successfully';
