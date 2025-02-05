@@ -39,6 +39,7 @@ export class NodeMailerService {
   @Process()
   async sendEmail(job: Job<MailOptions>) {
     return await this.createTransport().sendMail({
+      from: this.configService.get<string>('MAIL_FROM'),
       ...job.data,
     });
   }
