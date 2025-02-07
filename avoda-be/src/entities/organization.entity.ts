@@ -4,10 +4,10 @@ import {
   Entity,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 import { User } from './user.entity';
 import { Project } from './project.entity';
@@ -42,6 +42,7 @@ export class Organization {
 
   // 1 stands for true, 0 stands for false
   @Column({ default: 1, type: 'smallint' })
+  @Exclude({ toPlainOnly: true })
   isDefaultOrg: number;
 
   @CreateDateColumn()

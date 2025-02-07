@@ -14,10 +14,7 @@ import { PermissionEntity } from './permissions.entity';
 import { User } from './user.entity';
 import { InvitesRepository } from './invites.entity';
 
-enum USER_ROLES {
-  MEMBER = 'MEMBER',
-  OWNER = 'OWNER',
-}
+import { USER_ROLES } from '@/shared/constants/user-role.constants';
 
 @Entity('organization_member')
 export class OrganizationMembers {
