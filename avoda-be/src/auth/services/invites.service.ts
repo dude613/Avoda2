@@ -123,6 +123,11 @@ export class InvitesService {
       throw new AppError('No invite found for this user', HttpStatus.NOT_FOUND);
     }
 
+    // check token expiry
+    if (new Date() > invite.expiresAt) {
+      throw new AppError('Invite has expired', HttpStatus.BAD_REQUEST);
+    }
+
     const queryRunner = this.dataSource.createQueryRunner();
     try {
       await queryRunner.startTransaction();
