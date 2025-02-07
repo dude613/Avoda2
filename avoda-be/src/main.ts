@@ -39,6 +39,7 @@ async function bootstrap() {
     console.error(`Unhandled rejection, reason: ${reason.message}`);
 
     await app.close();
+    process.exit(1);
   });
 
   process.on(Signals.SIGTERM, async () => {
