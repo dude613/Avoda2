@@ -75,7 +75,10 @@ export class AuthController {
   @Post('/update-invite-status')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  updateInvite(@Body() body: UpdateInviteDTO) {
-    return this.invitesService.updateInvite(body);
+  updateInvite(
+    @Body() body: UpdateInviteDTO,
+    @CurrentUser() user: Partial<User>
+  ) {
+    return this.invitesService.updateInvite(body, user);
   }
 }

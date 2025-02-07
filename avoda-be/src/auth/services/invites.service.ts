@@ -1,7 +1,7 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, In, QueryRunner, Repository } from 'typeorm';
 
 import { EmailService } from '@/email/email.service';
 
@@ -17,9 +17,20 @@ import {
 } from '@/shared/constants/database.constants';
 import { INVITE_STATUS } from '@/shared/constants/invite-status.constants';
 
+import { USER_PERMISSIONS } from '@/enums/permissions.enum';
+
 import { AppError } from '@/shared/appError.util';
+import { USER_ROLES } from '@/shared/constants/user-role.constants';
 
 import { UpdateInviteDTO } from '@/auth/dto/update-invite.dto';
+
+import { PermissionEntity } from '@/entities/permissions.entity';
+
+type DecodedInviteToken = {
+  sub: string;
+  email: string;
+  organizationId: string;
+};
 
 @Injectable()
 export class InvitesService {
@@ -92,11 +103,13 @@ export class InvitesService {
     }
   }
 
-  async updateInvite(data: UpdateInviteDTO) {
-    const decodedToken: { sub: string; email: string; organizationId: string } =
-      await this.jwtService.verifyAsync(data.token, {
+  async updateInvite(data: UpdateInviteDTO, user: Partial<User>) {
+    const decodedToken: DecodedInviteToken = await this.jwtService.verifyAsync(
+      data.token,
+      {
         secret: this.configService.get<string>('JWT_INVITE_TOKEN_SECRET'),
-      });
+      }
+    );
 
     const invite = await this.invitesRepository.findOne({
       where: {
@@ -110,18 +123,78 @@ export class InvitesService {
       throw new AppError('No invite found for this user', HttpStatus.NOT_FOUND);
     }
 
-    await this.invitesRepository.update(
-      { id: invite.id, organization: { id: decodedToken.organizationId } },
-      {
-        status: data.status,
-        acceptedAt:
-          data.status === INVITE_STATUS.ACCEPTED ? new Date(Date.now()) : null,
-        revokedAt:
-          data.status === INVITE_STATUS.REJECTED ? new Date(Date.now()) : null,
-      }
-    );
+    const queryRunner = this.dataSource.createQueryRunner();
+    try {
+      await queryRunner.startTransaction();
 
-    return 'Status updated successfully';
+      // add user to organization member table
+      const member = await this.addOrganizationMember(
+        queryRunner,
+        user,
+        decodedToken.organizationId
+      );
+
+      // grant limited permissions
+      await this.createMemberPermissions(queryRunner, member);
+
+      // update invite status
+      await queryRunner.manager.update(
+        InvitesRepository,
+        { id: invite.id, organization: { id: decodedToken.organizationId } },
+        {
+          status: data.status,
+          acceptedAt:
+            data.status === INVITE_STATUS.ACCEPTED
+              ? new Date(Date.now())
+              : null,
+          revokedAt:
+            data.status === INVITE_STATUS.REJECTED
+              ? new Date(Date.now())
+              : null,
+        }
+      );
+
+      await queryRunner.commitTransaction();
+
+      return 'Status updated successfully';
+    } catch {
+      await queryRunner.rollbackTransaction();
+
+      throw new AppError(
+        'Failed to update invite status',
+        HttpStatus.UNPROCESSABLE_ENTITY
+      );
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  private async addOrganizationMember(
+    queryRunner: QueryRunner,
+    user: Partial<User>,
+    organizationId: string
+  ) {
+    const member = queryRunner.manager.create(OrganizationMembers, {
+      user: { id: user.id },
+      organization: { id: organizationId },
+      role: USER_ROLES.MEMBER,
+    });
+
+    return await queryRunner.manager.save(member);
+  }
+
+  private async createMemberPermissions(
+    queryRunner: QueryRunner,
+    member: OrganizationMembers
+  ) {
+    const permission = queryRunner.manager.create(PermissionEntity, {
+      member: {
+        id: member.id,
+      },
+      permissions: USER_PERMISSIONS.READ_ORGANIZATION,
+    });
+
+    await queryRunner.manager.save(permission);
   }
 
   private async sendInviteEmail(emailData: { email: string; url: string }) {

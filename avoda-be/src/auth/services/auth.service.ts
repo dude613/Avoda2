@@ -31,7 +31,7 @@ export class AuthService {
     @Inject(DATA_SOURCE)
     private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {}
   async signupWithPassword(createUserDto: CreateUserDTO) {
     // check if the user exists
@@ -42,7 +42,7 @@ export class AuthService {
     if (existingUser)
       throw new AppError(
         'Cannot create user at this time. Please try again later.',
-        HttpStatus.CONFLICT,
+        HttpStatus.CONFLICT
       );
 
     const salt = await bcrypt.genSalt();
@@ -50,9 +50,9 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
 
     const queryRunner = this.dataSource.createQueryRunner();
-    queryRunner.startTransaction();
 
     try {
+      await queryRunner.startTransaction();
       // 1. Create the user
       const user = queryRunner.manager.create(User, {
         ...createUserDto,
@@ -67,14 +67,14 @@ export class AuthService {
       const { id } = await this.createDefaultOrganization(
         queryRunner,
         createUserDto,
-        user,
+        user
       );
 
       // 1b. Add user as owner of default Org
       const savedOrgMember = await this.addDefaultOrgMember(
         queryRunner,
         id,
-        user,
+        user
       );
 
       // 2a Create permission
@@ -90,7 +90,7 @@ export class AuthService {
       // throw the error so the AppError can catch it
       throw new AppError(
         'Failed to create user at this time!. Please try again',
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY
       );
     } finally {
       await queryRunner.release();
@@ -116,7 +116,7 @@ export class AuthService {
       };
     }
 
-    throw new AppError('No user found!!', HttpStatus.BAD_REQUEST);
+    throw new AppError('Invalid email or password!', HttpStatus.NOT_FOUND);
   }
 
   async refreshToken(id: string) {
@@ -142,7 +142,7 @@ export class AuthService {
   private async createDefaultOrganization(
     queryRunner: QueryRunner,
     createUserDto: CreateUserDTO,
-    user: User,
+    user: User
   ) {
     const doc = queryRunner.manager.create(Organization, {
       name: `${createUserDto.firstName}-${createUserDto.lastName}-org`,
@@ -155,7 +155,7 @@ export class AuthService {
   private async addDefaultOrgMember(
     queryRunner: QueryRunner,
     orgId: string,
-    user: User,
+    user: User
   ) {
     const createMember = queryRunner.manager.create(OrganizationMembers, {
       user: { id: user.id },
@@ -167,7 +167,7 @@ export class AuthService {
 
   private async createDefaultPermission(
     queryRunner: QueryRunner,
-    memberId: string,
+    memberId: string
   ) {
     const userPermissions = queryRunner.manager.create(PermissionEntity, {
       member: { id: memberId },

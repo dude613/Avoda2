@@ -19,7 +19,7 @@ export class PermissionsGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     @Inject(PERMISSIONS_REPOSITORY)
-    private readonly permissionsRepository: Repository<PermissionEntity>,
+    private readonly permissionsRepository: Repository<PermissionEntity>
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -44,12 +44,12 @@ export class PermissionsGuard implements CanActivate {
     if (orgMember && !orgMember.length) return false;
 
     const permissionArray = orgMember.map(
-      (p: { permissions: string }) => p.permissions,
+      (p: { permissions: string }) => p.permissions
     );
 
     // Check if user has any of the required permissions
     const hasPermission = requiredPermissions.some((permission) =>
-      permissionArray.includes(permission),
+      permissionArray.includes(permission)
     );
 
     return hasPermission;
