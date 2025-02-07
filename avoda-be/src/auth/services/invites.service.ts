@@ -98,6 +98,11 @@ export class InvitesService {
       await Promise.all(emailPromises);
 
       return 'Invite(s) sent';
+    } catch {
+      throw new AppError(
+        'Failed to send invite(s)',
+        HttpStatus.UNPROCESSABLE_ENTITY
+      );
     } finally {
       await queryRunner.release();
     }
