@@ -41,7 +41,7 @@ export class AuthService {
 
     if (existingUser)
       throw new AppError(
-        'Cannot create user at this time. Please try again later.',
+        'Unable to complete registration. Please try again or contact support.',
         HttpStatus.CONFLICT
       );
 
