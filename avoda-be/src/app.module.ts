@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { BullModule } from '@nestjs/bull';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
@@ -29,12 +29,10 @@ import { EmailModule } from '@/email/email.module';
     OrganizationsModule,
     EmailModule,
     BullModule.forRootAsync({
-      useFactory: () => ({
-        redis: {
-          host: 'localhost',
-          port: 6379,
-        },
+      useFactory: (config: ConfigService) => ({
+        redis: config.get<string>('REDIS_CONNECTION_URL'),
       }),
+      inject: [ConfigService],
     }),
   ],
   providers: [
