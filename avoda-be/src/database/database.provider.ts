@@ -10,11 +10,11 @@ export const databaseProviders = [
     useFactory: async (config: ConfigService) => {
       const dataSource = new DataSource({
         type: 'mysql',
-        host: config.get<string>('DB_HOST'),
-        port: parseInt(config.get<string>('DB_PORT')),
+        host: config.get<string>('DB_STAGING_HOST'),
+        port: parseInt(config.get<string>('DB_PORT_STAGING')),
         username: config.get<string>('DB_USERNAME'),
-        password: config.get<string>('DB_PASSWORD'),
-        database: config.get<string>('DB_NAME'),
+        password: config.get<string>('DB_PASSWORD_STAGING'),
+        database: config.get<string>('DB_NAME_STAGING'),
         synchronize: config.get<string>('NODE_ENV') !== Environment.PRODUCTION,
         entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
         migrationsRun: true,
