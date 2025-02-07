@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 
 import { DATA_SOURCE } from '@/shared/constants/database.constants';
+import { Environment } from '@/shared/environment.config';
 
 export const databaseProviders = [
   {
@@ -14,11 +15,10 @@ export const databaseProviders = [
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
-        synchronize: true,
+        synchronize: config.get<string>('NODE_ENV') !== Environment.PRODUCTION,
         entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
         migrationsRun: true,
         migrations: [`${__dirname}/../../migrations/*{.ts,.js}`],
-
         logging: true,
       });
 
