@@ -10,14 +10,14 @@ import { UserService } from './users.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('/:id')
-  getUserById(@Param('id') id: string) {
-    return this.userService.getUserById(id);
-  }
-
   @Get('/profile/me')
   @UseGuards(AuthGuard)
   getProfile(@CurrentUser() user: Partial<User>) {
     return this.userService.getProfile(user);
+  }
+
+  @Get('/:id')
+  getUserById(@Param('id') id: string) {
+    return this.userService.getUserById(id);
   }
 }
