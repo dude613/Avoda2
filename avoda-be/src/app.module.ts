@@ -10,7 +10,7 @@ import { TransformInterceptor } from '@/interceptors/transform.interceptor';
 import { ValidationPipe } from '@/pipes/validation.pipe';
 
 import { GlobalExceptionsFilter } from '@/filters/global-exception.filter';
-import { validate } from '@/shared/environment.config';
+import { Environment, validate } from '@/shared/environment.config';
 
 import { AuthGuard } from '@/auth/access-token.guard';
 import { UsersModule } from '@/users/users.module';
@@ -30,7 +30,13 @@ import { EmailModule } from '@/email/email.module';
     EmailModule,
     BullModule.forRootAsync({
       useFactory: (config: ConfigService) => ({
-        redis: config.get<string>('REDIS_CONNECTION_URL'),
+        redis:
+          config.get<string>('NODE_ENV') === Environment.STAGING
+            ? config.get<string>('REDIS_CONNECTION_URL')
+            : {
+                host: 'localhost',
+                port: 6379,
+              },
       }),
       inject: [ConfigService],
     }),

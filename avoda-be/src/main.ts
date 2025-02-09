@@ -13,6 +13,7 @@ async function bootstrap() {
     cors: {
       origin: process.env.NODE_ENV !== Environment.PRODUCTION && '*',
       credentials: true,
+      allowedHeaders: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     },
   });
 
