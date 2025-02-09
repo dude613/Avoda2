@@ -34,10 +34,9 @@ export class UserService {
     const user = await this.getUserById(currentUser.id);
 
     //  call the organizations repository
-    const organizations = await this.organizationsRepository
-      .createQueryBuilder('org')
-      .where('org.createdBy.id = :userId', { userId: currentUser.id })
-      .getMany();
+    const organizations = await this.organizationsRepository.find({
+      where: { createdBy: { id: currentUser.id } },
+    });
 
     return {
       user,
