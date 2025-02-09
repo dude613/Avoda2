@@ -22,7 +22,7 @@ export abstract class BaseAuthStrategy implements CanActivate {
     protected readonly configService: ConfigService,
     protected readonly jwtService: JwtService,
     protected readonly userService: UserService,
-    private readonly reflector: Reflector,
+    private readonly reflector: Reflector
   ) {}
 
   protected abstract getSecretKey(): string;
@@ -71,12 +71,9 @@ export abstract class BaseAuthStrategy implements CanActivate {
   }
 
   private async validateUser(payload: JWTPayload) {
-    const user = await this.userService.getUserById(payload.sub);
-
-    if (!user) {
-      throw new AppError('User not found', HttpStatus.NOT_FOUND);
-    }
-
-    return user;
+    // There would be no need t perform a check.
+    // The user service already checks and throws an error
+    // if no user is found. So just return the data from the service
+    return await this.userService.getUserById(payload.sub);
   }
 }
