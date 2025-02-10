@@ -32,8 +32,14 @@ async function bootstrap() {
     app.use(morgan('dev'));
   }
 
+  // prefix all routes with leading 'api' prefix
+  const GLOBAL_PREFIX = 'api/';
+  app.setGlobalPrefix(GLOBAL_PREFIX);
+
   await app.listen(process.env.PORT ?? 4000, async () => {
-    new Logger('AppLogStarter').log(`App is running on: ${process.env.PORT}`);
+    new Logger('AppLogStarter').log(
+      `App is running on: ${process.env.PORT}/${GLOBAL_PREFIX}`
+    );
   });
 
   process.on(Signals.UNHANDLED_REJECTION, async (reason: any) => {
