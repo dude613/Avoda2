@@ -14,6 +14,8 @@ import { PermissionEntity } from '@/entities/permissions.entity';
 
 import { USER_PERMISSIONS } from '@/enums/permissions.enum';
 
+import { UpdateOrganizationDTO } from '../dto/update-organization.dto';
+
 @Injectable()
 export class OrganizationsService {
   constructor(
@@ -99,5 +101,20 @@ export class OrganizationsService {
     } finally {
       queryRunner.release();
     }
+  }
+
+  async updateOrganization(data: UpdateOrganizationDTO, id: string) {
+    const organization = await this.getOrganizationById(id);
+
+    const result = await this.organizationRepository.update(
+      { id: organization.id },
+      { ...data }
+    );
+
+    if (result.affected) {
+      return 'Organization updated successfully';
+    }
+
+    throw new AppError('Error updating organization', HttpStatus.BAD_REQUEST);
   }
 }

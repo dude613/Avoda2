@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 
 import { AuthGuard } from '@/auth/access-token.guard';
 import { PermissionsGuard } from '@/shared/guards/permissions.guard';
@@ -10,7 +19,9 @@ import { USER_PERMISSIONS } from '@/enums/permissions.enum';
 import { User } from '@/entities/user.entity';
 
 import { OrganizationsService } from '../services/organizations.service';
+
 import { CreateOrganizationDTO } from '../dto/create-organization.dto';
+import { UpdateOrganizationDTO } from '../dto/update-organization.dto';
 
 @Controller('organizations')
 @UseGuards(AuthGuard)
@@ -38,5 +49,18 @@ export class OrganizationsController {
     @Body() { name }: CreateOrganizationDTO
   ) {
     return this.organizationService.createOrganization(name, user);
+  }
+
+  @Post('/:id/update')
+  @HttpCode(HttpStatus.OK)
+  @RequirePermissions(
+    USER_PERMISSIONS.ROOT_PERMISSION,
+    USER_PERMISSIONS.UPDATE_ORGANIZATION
+  )
+  updateOrganization(
+    @Param('id') id: string,
+    @Body() data: UpdateOrganizationDTO
+  ) {
+    return this.organizationService.updateOrganization(data, id);
   }
 }
