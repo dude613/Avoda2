@@ -52,7 +52,7 @@ export class OrganizationsController {
     return this.organizationService.createOrganization(name, user);
   }
 
-  @Patch('/:id/update')
+  @Patch('/:id')
   @HttpCode(HttpStatus.OK)
   @RequirePermissions(
     USER_PERMISSIONS.ROOT_PERMISSION,
