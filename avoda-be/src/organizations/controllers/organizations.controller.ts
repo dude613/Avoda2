@@ -58,6 +58,7 @@ export class OrganizationsController {
     USER_PERMISSIONS.ROOT_PERMISSION,
     USER_PERMISSIONS.UPDATE_ORGANIZATION
   )
+  @UseGuards(PermissionsGuard)
   updateOrganization(
     @Param('id') id: string,
     @Body() data: UpdateOrganizationDTO
