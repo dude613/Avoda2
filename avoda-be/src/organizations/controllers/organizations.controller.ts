@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -51,7 +52,7 @@ export class OrganizationsController {
     return this.organizationService.createOrganization(name, user);
   }
 
-  @Post('/:id/update')
+  @Patch('/:id/update')
   @HttpCode(HttpStatus.OK)
   @RequirePermissions(
     USER_PERMISSIONS.ROOT_PERMISSION,
