@@ -52,5 +52,5 @@ export class Organization {
   updatedAt: Date;
 
   @DeleteDateColumn({ nullable: true })
-  deletedAt?: Date;
+  deletedAt: Date;
 }
