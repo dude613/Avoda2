@@ -60,9 +60,9 @@ export class OrganizationsService {
 
   async createOrganization(name: string, user: Partial<User>) {
     const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.startTransaction();
 
     try {
-      await queryRunner.startTransaction();
       // create the organization
       const org = queryRunner.manager.create(Organization, {
         name,
@@ -121,15 +121,29 @@ export class OrganizationsService {
   async deleteOrganization(id: string) {
     const organization = await this.getOrganizationById(id);
 
-    const result = await this.organizationRepository.softDelete({
-      id: organization.id,
-      isDefaultOrg: Not(1), // don't allow deletion of default org
-    });
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.startTransaction();
 
-    if (result.affected) {
-      return 'Organization deleted successfully';
+    try {
+      const result = await queryRunner.manager.softDelete(Organization, {
+        id: organization.id,
+        isDefaultOrg: Not(1), // don't allow deletion of default org
+      });
+
+      await queryRunner.commitTransaction();
+
+      if (result.affected) {
+        return 'Organization deleted successfully';
+      }
+    } catch {
+      await queryRunner.rollbackTransaction();
+
+      throw new AppError(
+        'Failed to delete organization',
+        HttpStatus.BAD_REQUEST
+      );
+    } finally {
+      await queryRunner.release();
     }
-
-    throw new AppError('Failed to delete organization', HttpStatus.BAD_REQUEST);
   }
 }
