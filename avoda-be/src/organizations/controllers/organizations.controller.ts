@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -64,5 +65,12 @@ export class OrganizationsController {
     @Body() data: UpdateOrganizationDTO
   ) {
     return this.organizationService.updateOrganization(data, id);
+  }
+
+  @Delete('/:id')
+  @RequirePermissions(USER_PERMISSIONS.ROOT_PERMISSION)
+  @UseGuards(PermissionsGuard)
+  deleteOrganization(@Param('id') id: string) {
+    return this.organizationService.deleteOrganization(id);
   }
 }

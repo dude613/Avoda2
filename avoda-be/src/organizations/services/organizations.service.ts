@@ -99,7 +99,7 @@ export class OrganizationsService {
         HttpStatus.UNPROCESSABLE_ENTITY
       );
     } finally {
-      queryRunner.release();
+      await queryRunner.release();
     }
   }
 
@@ -116,5 +116,19 @@ export class OrganizationsService {
     }
 
     throw new AppError('Error updating organization', HttpStatus.BAD_REQUEST);
+  }
+
+  async deleteOrganization(id: string) {
+    const organization = await this.getOrganizationById(id);
+
+    const result = await this.organizationRepository.softDelete({
+      id: organization.id,
+    });
+
+    if (result.affected) {
+      return 'Organization deleted successfully';
+    }
+
+    return 'Failed to delete organization';
   }
 }
