@@ -5,6 +5,7 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 
 import { INVITE_STATUS } from '@/shared/constants/invite-status.constants';
@@ -42,4 +43,7 @@ export class InvitesRepository {
   createdAt: Date;
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn({ nullable: true })
+  deletedAt: Date;
 }
