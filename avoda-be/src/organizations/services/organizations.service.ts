@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Not, Repository } from 'typeorm';
 
 import { AppError } from '@/shared/appError.util';
 import {
@@ -123,12 +123,13 @@ export class OrganizationsService {
 
     const result = await this.organizationRepository.softDelete({
       id: organization.id,
+      isDefaultOrg: Not(1), // don't allow deletion of default org
     });
 
     if (result.affected) {
       return 'Organization deleted successfully';
     }
 
-    return 'Failed to delete organization';
+    throw new AppError('Failed to delete organization', HttpStatus.BAD_REQUEST);
   }
 }
