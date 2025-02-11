@@ -134,9 +134,9 @@ export class InvitesService {
     }
 
     const queryRunner = this.dataSource.createQueryRunner();
-    try {
-      await queryRunner.startTransaction();
+    await queryRunner.startTransaction();
 
+    try {
       // add user to organization member table
       const member = await this.addOrganizationMember(
         queryRunner,

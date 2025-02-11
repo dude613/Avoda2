@@ -51,8 +51,9 @@ export class AuthService {
 
     const queryRunner = this.dataSource.createQueryRunner();
 
+    await queryRunner.startTransaction();
+
     try {
-      await queryRunner.startTransaction();
       // 1. Create the user
       const user = queryRunner.manager.create(User, {
         ...createUserDto,
