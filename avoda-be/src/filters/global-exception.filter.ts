@@ -27,14 +27,11 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
     let data: { [x: string]: any } | undefined | string = undefined;
 
     if (err instanceof AppError) {
-      switch (err.status) {
-        case HttpStatus.BAD_REQUEST:
-          message = err.message;
-          break;
-        case HttpStatus.GATEWAY_TIMEOUT:
-          message = err.message;
-          break;
-      }
+      const errorMessages: Record<number, string> = {
+        [HttpStatus.BAD_REQUEST]: err.message,
+        [HttpStatus.GATEWAY_TIMEOUT]: err.message,
+      };
+      message = errorMessages[err.status] ?? message;
     } else if (err instanceof TypeORMError || err instanceof QueryFailedError) {
       message = 'Your request cannot be processed right now. Please try again';
     }
