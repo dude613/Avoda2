@@ -9,10 +9,12 @@ import { organizationProvider } from './organizations.provider';
 import { OrganizationsService } from './services/organizations.service';
 import { PermissionsService } from './services/permissions.service';
 import { MemberService } from './services/members.service';
+import { TimeLogService } from './services/time-log.service';
 
 import { OrganizationsController } from './controllers/organizations.controller';
 import { PermissionsController } from './controllers/permissions.controller';
 import { MembersController } from './controllers/members.controller';
+import { TimeLogController } from './controllers/time-log.controller';
 
 @Module({
   imports: [DatabaseModule],
@@ -21,6 +23,7 @@ import { MembersController } from './controllers/members.controller';
     UserService,
     PermissionsService,
     MemberService,
+    TimeLogService,
     ...organizationProvider,
     ...userProviders,
   ],
@@ -28,6 +31,7 @@ import { MembersController } from './controllers/members.controller';
     OrganizationsController,
     PermissionsController,
     MembersController,
+    TimeLogController,
   ],
 })
 export class OrganizationsModule {}

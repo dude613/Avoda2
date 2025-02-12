@@ -1,6 +1,5 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 
-import { AuthGuard } from '@/auth/access-token.guard';
 import { PermissionsGuard } from '@/shared/guards/permissions.guard';
 
 import { RequirePermissions } from '@/decorators/require-permissions.decorator';
@@ -10,7 +9,7 @@ import { PermissionsService } from '../services/permissions.service';
 import { UpdatePermissionsDTO } from '../dto/update-permissions.dto';
 
 @Controller('organizations/:id/permissions')
-@UseGuards(AuthGuard, PermissionsGuard)
+@UseGuards(PermissionsGuard)
 @RequirePermissions(
   USER_PERMISSIONS.ROOT_PERMISSION,
   USER_PERMISSIONS.UPDATE_USER

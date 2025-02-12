@@ -7,6 +7,7 @@ import {
 import { Response } from 'express';
 import { JsonWebTokenError } from 'jsonwebtoken';
 import { ValidationError } from 'class-validator';
+import { TypeORMError, QueryFailedError } from 'typeorm';
 
 import { ValidationException } from './validation-exception.filter';
 
@@ -34,6 +35,8 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
           message = err.message;
           break;
       }
+    } else if (err instanceof TypeORMError || err instanceof QueryFailedError) {
+      message = 'Your request cannot be processed right now. Please try again';
     }
 
     if (typeof err.message === 'string') {
