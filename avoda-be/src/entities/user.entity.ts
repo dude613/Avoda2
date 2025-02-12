@@ -11,6 +11,7 @@ import {
 
 import { Organization } from './organization.entity';
 import { OrganizationMembers } from './org-member.entity';
+import { TimeLog } from './time-log.entity';
 
 @Entity('user')
 export class User {
@@ -32,6 +33,9 @@ export class User {
 
   @OneToMany(() => OrganizationMembers, (membership) => membership.organization)
   memberships: OrganizationMembers[];
+
+  @OneToMany(() => TimeLog, (timeLog) => timeLog.status)
+  timeLogs: TimeLog[];
 
   /** User rate. This column could be null because the org/project could have a set rate. */
   @Column({ nullable: true })

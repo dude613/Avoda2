@@ -34,4 +34,19 @@ export class MemberService {
       permissions: member.permissions.map((perm) => perm.permission), // Extract only the permission string
     }));
   }
+
+  async getMemberProfile(id: string, orgId: string) {
+    const member = await this.membersEntity
+      .createQueryBuilder('m')
+      .leftJoinAndSelect('m.permissions', 'p')
+      .leftJoinAndSelect('m.user', 'u')
+      .where({ organization: { id: orgId } })
+      .andWhere({ user: { id } })
+      .getOne();
+
+    return {
+      ...member,
+      permissions: member.permissions.map((perm) => perm.permission), // Extract only the permission string
+    };
+  }
 }
