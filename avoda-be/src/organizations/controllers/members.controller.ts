@@ -2,6 +2,9 @@ import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 
 import { AuthGuard } from '@/auth/access-token.guard';
 import { RequirePermissions } from '@/decorators/require-permissions.decorator';
+import { CurrentUser } from '@/decorators/current-user.decorator';
+
+import { User } from '@/entities/user.entity';
 
 import { USER_PERMISSIONS } from '@/enums/permissions.enum';
 import { PermissionsGuard } from '@/shared/guards/permissions.guard';
@@ -20,5 +23,13 @@ export class MembersController {
   @Get()
   getMembers(@Param('id') id: string) {
     return this.orgMembersService.getMembers(id);
+  }
+
+  @Get('/profile')
+  getMemberProfile(
+    @Param('id') id: string,
+    @CurrentUser() user: Partial<User>
+  ) {
+    return this.orgMembersService.getMemberProfile(user.id, id);
   }
 }

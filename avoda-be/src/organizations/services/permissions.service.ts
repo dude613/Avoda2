@@ -8,9 +8,9 @@ import {
   ORGANIZATIONS_MEMBERS_REPOSITORY,
   PERMISSIONS_REPOSITORY,
 } from '@/shared/constants/database.constants';
+import { AppError } from '@/shared/appError.util';
 
 import { UpdatePermissionsDTO } from '../dto/update-permissions.dto';
-import { AppError } from '../../shared/appError.util';
 
 @Injectable()
 export class PermissionsService {
@@ -65,4 +65,11 @@ export class PermissionsService {
 
     return 'Permission(s) granted successfully';
   }
+
+  async revokePermissions() {
+    // find the user
+  }
+  async revokePermission(id: string) {}
+
+  async getPermissions(memberId: string) {}
 }
