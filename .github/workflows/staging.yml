@@ -29,26 +29,29 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
 
-      - name: Install dependencies
+      # ✅ Install dependencies in both backend and frontend directories
+      - name: Install Backend Dependencies
+        working-directory: avoda-be
+        run: pnpm install
+
+      - name: Install Frontend Dependencies
+        working-directory: avoda-fe
         run: pnpm install
 
       - name: Backend Lint
-        run: |
-          cd avoda-be
-          pnpm lint
+        working-directory: avoda-be
+        run: pnpm lint
 
       - name: Backend Test
-        run: |
-          cd avoda-be
-          pnpm test
+        working-directory: avoda-be
+        run: pnpm test
 
       - name: Frontend Lint & Format
+        working-directory: avoda-fe
         run: |
-          cd avoda-fe
           pnpm lint
           pnpm format
 
       - name: Frontend Build
-        run: |
-          cd avoda-fe
-          pnpm build
+        working-directory: avoda-fe
+        run: pnpm build
