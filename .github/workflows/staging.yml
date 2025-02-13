@@ -19,6 +19,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
+      - name: Install pnpm
+        run: pnpm install -g pnpm
       - name: Backend Lint
         run: |
           cd avoda-be
