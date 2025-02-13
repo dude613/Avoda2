@@ -39,6 +39,7 @@ export class TimeLogService {
 
     return result;
   }
+
   async pauseTracking(entryId: string) {
     const entry = await this.getTimeLogById(entryId);
 
@@ -70,6 +71,13 @@ export class TimeLogService {
   async resumeTracking(entryId: string) {
     const entry = await this.getTimeLogById(entryId);
 
+    if (entry.status === TimeLogStatus.STOPPED) {
+      throw new AppError(
+        'Unable to resume stopped time!',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
     if (entry.status === TimeLogStatus.STARTED) {
       throw new AppError('Timer is already running', HttpStatus.BAD_REQUEST);
     }
@@ -93,13 +101,11 @@ export class TimeLogService {
 
     // If it was running, calculate final active time
     if (entry.status === TimeLogStatus.STARTED) {
-      const activeTimeSinceLastAction =
-        now.getTime() -
-        (entry.lastPausedAt
-          ? entry.lastPausedAt.getTime()
-          : entry.startTime.getTime());
+      const lastActiveAt = entry.lastPausedAt ?? entry.startTime;
+      const activeTimeSinceLastAction = now.getTime() - lastActiveAt.getTime();
       entry.activeTime += activeTimeSinceLastAction;
     }
+
     // If it was paused, add to total paused time
     else if (entry.lastPausedAt) {
       const pauseDuration = now.getTime() - entry.lastPausedAt.getTime();
