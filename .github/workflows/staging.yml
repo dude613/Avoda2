@@ -1,0 +1,38 @@
+name: Staging PR
+
+on:
+  pull_request:
+    branches:
+      - staging
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+      - name: Backend Lint
+        run: |
+          cd avoda-be
+          pnpm lint
+      - name: Backend Test
+        run: |
+          cd avoda-be
+          pnpm test
+      - name: Frontend Lint & Format
+        run: |
+          cd avoda-fe
+          pnpm lint
+          pnpm format
+      - name: Frontend Build
+        run: |
+          cd avoda-fe
+          pnpm build
