@@ -16,17 +16,19 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # 🛠 Install pnpm first using corepack (built into Node.js)
+      - name: Install pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+          pnpm --version  # Check if pnpm is installed correctly
+
+      # 🎯 Setup Node.js AFTER pnpm is installed
       - name: Setup Node.js with pnpm caching
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
-
-      - name: Enable and Install pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@latest --activate
-          pnpm --version  # Check if pnpm is installed correctly
 
       - name: Install dependencies
         run: pnpm install
