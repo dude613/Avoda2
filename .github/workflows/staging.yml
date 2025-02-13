@@ -16,12 +16,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 🛠 Install pnpm first using corepack (built into Node.js)
+      # 🛠 Manually Install pnpm (Avoid Corepack Issues)
       - name: Install pnpm
         run: |
-          corepack enable
-          corepack prepare pnpm@latest --activate
-          pnpm --version  # Check if pnpm is installed correctly
+          npm install -g pnpm
+          pnpm --version  # Verify installation
 
       # 🎯 Setup Node.js AFTER pnpm is installed
       - name: Setup Node.js with pnpm caching
