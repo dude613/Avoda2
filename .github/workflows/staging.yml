@@ -16,24 +16,34 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 🛠 Manually Install pnpm (Avoid Corepack Issues)
+      # 🛠 Install pnpm first manually (avoid Corepack issues)
       - name: Install pnpm
         run: |
           npm install -g pnpm
-          pnpm --version  # Verify installation
+          pnpm --version  # Verify pnpm installation
 
-      # 🎯 Setup Node.js AFTER pnpm is installed
-      - name: Setup Node.js with pnpm caching
+      # ✅ Setup Node.js with pnpm caching for Backend
+      - name: Setup Node.js for Backend
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
+          cache-dependency-path: avoda-be/pnpm-lock.yaml
 
-      # ✅ Install dependencies in both backend and frontend directories
+      # ✅ Setup Node.js with pnpm caching for Frontend
+      - name: Setup Node.js for Frontend
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: avoda-fe/pnpm-lock.yaml
+
+      # ✅ Install Backend Dependencies
       - name: Install Backend Dependencies
         working-directory: avoda-be
         run: pnpm install
 
+      # ✅ Install Frontend Dependencies
       - name: Install Frontend Dependencies
         working-directory: avoda-fe
         run: pnpm install
