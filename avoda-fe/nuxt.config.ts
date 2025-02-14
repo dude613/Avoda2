@@ -5,6 +5,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
+  modules: ['@vueuse/nuxt'],
 
   vite: {
     plugins: [tailwindcss()],
@@ -18,6 +19,7 @@ export default defineNuxtConfig({
       SUPABASE_PROJECT_URL: import.meta.env.SUPABASE_PROJECT_URL,
       SUPABASE_ANON_KEY: import.meta.env.SUPABASE_PROJECT_KEY,
       SUPABASE_SERVICE_ROLE_KEY: import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+      BASE_URL: import.meta.env.BASE_URL,
     },
   },
 });
