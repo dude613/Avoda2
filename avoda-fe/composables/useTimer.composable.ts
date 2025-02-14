@@ -1,4 +1,3 @@
-import { useLocalStorage } from '@vueuse/core';
 export const useTimeTracker = () => {
   const { post, patch, get } = useApi();
 
