@@ -59,7 +59,7 @@ export class TimeLogService {
     // Calculate active time since last start/resume
     const activeTimeSinceLastAction = now.getTime() - lastActiveAt.getTime();
 
-    entry.activeTime += activeTimeSinceLastAction;
+    entry.activeTime += activeTimeSinceLastAction; // Store in milliseconds
     entry.status = TimeLogStatus.PAUSED;
     entry.lastPausedAt = now;
 
