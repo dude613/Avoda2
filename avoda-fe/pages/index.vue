@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { createClient } from '@supabase/supabase-js';
+import { useLocalStorage } from '@vueuse/core';
+
 const runTimeConfig = useRuntimeConfig();
+
+const { post } = useApi();
 
 useHead({
   title: 'Caliber6 | Employment Management System',
@@ -12,14 +15,6 @@ useHead({
     },
   ],
 });
-
-const supabase = createClient(
-  runTimeConfig.public.SUPABASE_PROJECT_URL.replace(
-    '<project>',
-    runTimeConfig.public.PROJECT_NAME
-  ),
-  runTimeConfig.public.SUPABASE_ANON_KEY
-);
 
 const marketing_content = [
   {
@@ -51,12 +46,32 @@ const updatePasswordModelValue = (e: string) => {
 };
 
 const loginWithPassword = async () => {
-  const data = await supabase.auth.signInWithPassword({
-    email: email.value,
-    password: password.value,
+  const data = await post<any>(
+    `${runTimeConfig.public.BASE_URL}/auth/login-with-password`,
+    {
+      email: email.value,
+      password: password.value,
+    }
+  );
+
+  console.log(data.data, 'data...');
+
+  // set relevant data in local storage
+  useLocalStorage('USER_DATA', data.data.user, {
+    flush: 'sync',
+    deep: true,
+  });
+  useLocalStorage('ACCESS_TOKEN', data.data.tokens.accessToken, {
+    flush: 'sync',
   });
 
-  console.log(data.data);
+  useLocalStorage('REFRESH_TOKEN', data.data.tokens.refreshToken, {
+    flush: 'sync',
+  });
+
+  // reset states
+  // email.value = '';
+  // password.value = '';
 };
 </script>
 
@@ -89,6 +104,10 @@ const loginWithPassword = async () => {
         <p class="text-sm">{{ content.description }}</p>
       </div>
     </div>
+  </section>
+
+  <section>
+    <Timer />
   </section>
 
   <section class="flex justify-center mt-6">
