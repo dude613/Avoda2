@@ -65,7 +65,7 @@ export class TimeLogService {
       const activeTimeSinceLastAction = now.getTime() - lastActiveAt.getTime();
 
       /**
-         * How activeTime Works in Your Logic
+         * How activeTime Works
           •	When the timer starts, activeTime is 0 (or null if uninitialized).
           •	When the timer is paused, the system calculates how much time has passed since the last start/resume and adds that duration to activeTime.
           •	When the timer resumes, activeTime remains unchanged until the next pause.
