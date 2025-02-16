@@ -1,10 +1,9 @@
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
 
-// import { useLocalStorage } from '@vueuse/core';
-
 export const useApi = () => {
   const runtimeConfig = useRuntimeConfig();
+  const router = useRouter();
 
   const token = ref<string | null>(null);
 
@@ -40,6 +39,22 @@ export const useApi = () => {
     }
   );
 
+  api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      if (error.code === 'ECONNABORTED') {
+        throw new Error('Request timeout - please try again');
+      }
+      if (error.response?.status === 401) {
+        token.value = '';
+      } else if (error.response?.status === 403) {
+        // Handle 403 Forbidden errors
+        // redirect user to previous page
+      }
+      return Promise.reject(error);
+    }
+  );
+
   // Response interceptor
   api.interceptors.response.use(
     (response) => response,
@@ -49,7 +64,10 @@ export const useApi = () => {
         // Clear token and redirect to login
         token.value = '';
         // You might want to add router navigation here
-        // router.push('/login');
+        router.push('/');
+      } else if (error.response?.status === 403) {
+        // Handle 403 Forbidden errors
+        // redirect user to previous page
       }
       return Promise.reject(error);
     }
