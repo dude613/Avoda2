@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 
 import { TIME_LOG_REPOSITORY } from '@/shared/constants/database.constants';
 import { AppError } from '@/shared/appError.util';
@@ -40,90 +40,119 @@ export class TimeLogService {
     return result;
   }
 
-  async pauseTracking(entryId: string) {
-    const entry = await this.getTimeLogById(entryId);
+  async pauseTracking(id: string) {
+    return await this.timeLogRepository.manager.transaction(async (tnx) => {
+      const entry = await this.fetchTimeLogWithLock(id, tnx);
 
-    if (entry.status === TimeLogStatus.NOT_STARTED) {
-      throw new AppError('Timer is not running', HttpStatus.BAD_REQUEST);
-    }
+      if (!entry) {
+        throw new AppError('Time entry not found', HttpStatus.NOT_FOUND);
+      }
 
-    if (entry.status === TimeLogStatus.PAUSED) {
-      throw new AppError('Timer is already paused', HttpStatus.BAD_REQUEST);
-    }
+      if (entry.status === TimeLogStatus.NOT_STARTED) {
+        throw new AppError('Timer is not running', HttpStatus.BAD_REQUEST);
+      }
 
-    // Calculate active time up to this pause
-    const now = new Date();
-    // Determine the last active timestamp (either last resumed time or start time)
-    const lastActiveAt = entry.lastPausedAt ?? entry.startTime;
+      if (entry.status === TimeLogStatus.PAUSED) {
+        throw new AppError('Timer is already paused', HttpStatus.BAD_REQUEST);
+      }
 
-    // Calculate active time since last start/resume
-    const activeTimeSinceLastAction = now.getTime() - lastActiveAt.getTime();
-
-    /**
-     * How activeTime Works in Your Logic
-      •	When the timer starts, activeTime is 0 (or null if uninitialized).
-      •	When the timer is paused, the system calculates how much time has passed since the last start/resume and adds that duration to activeTime.
-      •	When the timer resumes, activeTime remains unchanged until the next pause.
-      •	When the timer stops, activeTime contains the total tracked time.
-     */
-    entry.activeTime += activeTimeSinceLastAction; // Store in milliseconds
-    entry.status = TimeLogStatus.PAUSED;
-    entry.lastPausedAt = now;
-
-    const result = await this.timeLogRepository.save(entry);
-
-    return result;
-  }
-
-  async resumeTracking(entryId: string) {
-    const entry = await this.getTimeLogById(entryId);
-
-    if (entry.status === TimeLogStatus.STOPPED) {
-      throw new AppError(
-        'Unable to resume stopped time!',
-        HttpStatus.BAD_REQUEST
-      );
-    }
-
-    if (entry.status === TimeLogStatus.STARTED) {
-      throw new AppError('Timer is already running', HttpStatus.BAD_REQUEST);
-    }
-
-    if (entry.lastPausedAt) {
-      const pauseDuration = new Date().getTime() - entry.lastPausedAt.getTime();
-      entry.totalPausedTime += pauseDuration;
-    }
-
-    entry.status = TimeLogStatus.STARTED;
-
-    const result = await this.timeLogRepository.save(entry);
-
-    return result;
-  }
-
-  async stopTracking(entryId: string) {
-    const entry = await this.getTimeLogById(entryId);
-
-    const now = new Date();
-
-    // If it was running, calculate final active time
-    if (entry.status === TimeLogStatus.STARTED) {
+      // Calculate active time up to this pause
+      const now = new Date();
+      // Determine the last active timestamp (either last resumed time or start time)
       const lastActiveAt = entry.lastPausedAt ?? entry.startTime;
+
+      // Calculate active time since last start/resume
       const activeTimeSinceLastAction = now.getTime() - lastActiveAt.getTime();
-      entry.activeTime += activeTimeSinceLastAction;
+
+      /**
+         * How activeTime Works in Your Logic
+          •	When the timer starts, activeTime is 0 (or null if uninitialized).
+          •	When the timer is paused, the system calculates how much time has passed since the last start/resume and adds that duration to activeTime.
+          •	When the timer resumes, activeTime remains unchanged until the next pause.
+          •	When the timer stops, activeTime contains the total tracked time.
+         */
+      entry.activeTime += activeTimeSinceLastAction; // Store in milliseconds
+      entry.status = TimeLogStatus.PAUSED;
+      entry.lastPausedAt = now;
+
+      return await tnx.save(entry);
+    });
+  }
+
+  async resumeTracking(id: string) {
+    return await this.timeLogRepository.manager.transaction(async (tnx) => {
+      const entry = await this.fetchTimeLogWithLock(id, tnx);
+
+      if (!entry) {
+        throw new AppError('Time entry not found', HttpStatus.NOT_FOUND);
+      }
+
+      if (entry.status === TimeLogStatus.STOPPED) {
+        throw new AppError(
+          'Unable to resume stopped time!',
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      if (entry.status === TimeLogStatus.STARTED) {
+        throw new AppError('Timer is already running', HttpStatus.BAD_REQUEST);
+      }
+
+      if (entry.lastPausedAt) {
+        const pauseDuration =
+          new Date().getTime() - entry.lastPausedAt.getTime();
+        entry.totalPausedTime += pauseDuration;
+      }
+
+      entry.status = TimeLogStatus.STARTED;
+
+      return await tnx.save(entry);
+    });
+  }
+
+  async stopTracking(id: string) {
+    return await this.timeLogRepository.manager.transaction(async (tnx) => {
+      const entry = await this.fetchTimeLogWithLock(id, tnx);
+
+      if (!entry) {
+        throw new AppError('Time entry not found', HttpStatus.NOT_FOUND);
+      }
+      const now = new Date();
+
+      // If it was running, calculate final active time
+      if (entry.status === TimeLogStatus.STARTED) {
+        const lastActiveAt = entry.lastPausedAt ?? entry.startTime;
+        const activeTimeSinceLastAction =
+          now.getTime() - lastActiveAt.getTime();
+        entry.activeTime += activeTimeSinceLastAction;
+      }
+
+      // If it was paused, add to total paused time
+      else if (entry.lastPausedAt) {
+        const pauseDuration = now.getTime() - entry.lastPausedAt.getTime();
+        entry.totalPausedTime += pauseDuration;
+      }
+
+      entry.status = TimeLogStatus.STOPPED;
+      entry.endTime = now;
+
+      const result = await tnx.save(entry);
+
+      return result;
+    });
+  }
+
+  private async fetchTimeLogWithLock(id: string, entityManager: EntityManager) {
+    const entry = await entityManager
+      .getRepository<TimeLog>(TimeLog)
+      .createQueryBuilder('time_log')
+      .setLock('pessimistic_write')
+      .where({ id })
+      .getOne();
+
+    if (!entry) {
+      throw new AppError('Time entry not found', HttpStatus.NOT_FOUND);
     }
-
-    // If it was paused, add to total paused time
-    else if (entry.lastPausedAt) {
-      const pauseDuration = now.getTime() - entry.lastPausedAt.getTime();
-      entry.totalPausedTime += pauseDuration;
-    }
-
-    entry.status = TimeLogStatus.STOPPED;
-    entry.endTime = now;
-
-    const result = await this.timeLogRepository.save(entry);
-
-    return result;
+    return entry;
   }
 }
