@@ -1,0 +1,69 @@
+name: Staging PR
+
+on:
+  pull_request:
+    branches:
+      - staging
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 🛠 Install pnpm first manually (avoid Corepack issues)
+      - name: Install pnpm
+        run: |
+          npm install -g pnpm
+          pnpm --version  # Verify pnpm installation
+
+      # ✅ Setup Node.js with pnpm caching for Backend
+      - name: Setup Node.js for Backend
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: avoda-be/pnpm-lock.yaml
+
+      # ✅ Setup Node.js with pnpm caching for Frontend
+      - name: Setup Node.js for Frontend
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: avoda-fe/pnpm-lock.yaml
+
+      # ✅ Install Backend Dependencies
+      - name: Install Backend Dependencies
+        working-directory: avoda-be
+        run: pnpm install
+
+      # ✅ Install Frontend Dependencies
+      - name: Install Frontend Dependencies
+        working-directory: avoda-fe
+        run: pnpm install
+
+      - name: Backend Lint
+        working-directory: avoda-be
+        run: pnpm lint
+
+      - name: Backend Test
+        working-directory: avoda-be
+        run: pnpm test
+        continue-on-error: true
+
+      - name: Frontend Lint & Format
+        working-directory: avoda-fe
+        run: |
+          pnpm lint
+          pnpm format
+        continue-on-error: true
+
+      - name: Frontend Build
+        working-directory: avoda-fe
+        run: pnpm build
