@@ -55,12 +55,9 @@ export class ValidationPipe implements PipeTransform {
       throw new ValidationException(error);
     }
 
-<<<<<<< HEAD
-=======
     /**
      * Returns the original value if the validation passes.
      */
->>>>>>> main
     return value;
   }
 
