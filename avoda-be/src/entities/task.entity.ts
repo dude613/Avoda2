@@ -14,6 +14,7 @@ export class Task {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column() name: string;
 
+  @Column()
   // userId of the individual working on the task
   member_id: string;
 

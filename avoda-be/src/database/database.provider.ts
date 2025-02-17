@@ -10,16 +10,29 @@ export const databaseProviders = [
     useFactory: async (config: ConfigService) => {
       const dataSource = new DataSource({
         type: 'mysql',
-        host: config.get<string>('DB_HOST'),
-        port: parseInt(config.get<string>('DB_PORT')),
+        host:
+          config.get<string>('NODE_ENV') === Environment.STAGING
+            ? config.get<string>('DB_STAGING_HOST')
+            : 'localhost',
+        port: parseInt(
+          config.get<string>('NODE_ENV') === Environment.STAGING
+            ? config.get<string>('DB_PORT_STAGING')
+            : config.get<string>('DB_PORT')
+        ),
         username: config.get<string>('DB_USERNAME'),
-        password: config.get<string>('DB_PASSWORD'),
-        database: config.get<string>('DB_NAME'),
+        password:
+          config.get<string>('NODE_ENV') === Environment.STAGING
+            ? config.get<string>('DB_PASSWORD_STAGING')
+            : config.get<string>('DB_PASSWORD'),
+        database:
+          config.get<string>('NODE_ENV') === Environment.STAGING
+            ? config.get<string>('DB_NAME_STAGING')
+            : config.get<string>('DB_NAME'),
         synchronize: config.get<string>('NODE_ENV') !== Environment.PRODUCTION,
         entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
-        migrationsRun:
-          config.get<string>('NODE_ENV') === Environment.PRODUCTION,
-        logging: config.get<string>('NODE_ENV') !== Environment.PRODUCTION,
+        migrationsRun: true,
+        migrations: [`${__dirname}/../../migrations/*{.ts,.js}`],
+        logging: true,
       });
 
       return dataSource.initialize();

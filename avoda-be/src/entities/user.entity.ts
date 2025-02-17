@@ -6,9 +6,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  DeleteDateColumn,
 } from 'typeorm';
 
 import { Organization } from './organization.entity';
+import { OrganizationMembers } from './org-member.entity';
 
 @Entity('user')
 export class User {
@@ -25,8 +27,11 @@ export class User {
   password: string;
 
   // One user can have many organizations.
-  @OneToMany(() => Organization, (organization) => organization.owner_id)
+  @OneToMany(() => Organization, (organization) => organization.createdBy)
   organizations: Organization[];
+
+  @OneToMany(() => OrganizationMembers, (membership) => membership.organization)
+  memberships: OrganizationMembers[];
 
   /** User rate. This column could be null because the org/project could have a set rate. */
   @Column({ nullable: true })
@@ -36,4 +41,7 @@ export class User {
   createdAt: Date;
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn({ nullable: true })
+  deletedAt: Date;
 }

@@ -6,13 +6,15 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 
 import { AppError } from '@/shared/appError.util';
 
 import { UserService } from '@/users/users.service';
+import { IS_PUBLIC_KEY } from '@/decorators/isPublic.decorator';
 
-import { JWTPayload } from '../jwt-payload.type';
+import { JWTPayload } from '@/auth/jwt-payload.type';
 
 @Injectable()
 export abstract class BaseAuthStrategy implements CanActivate {
@@ -20,12 +22,18 @@ export abstract class BaseAuthStrategy implements CanActivate {
     protected readonly configService: ConfigService,
     protected readonly jwtService: JwtService,
     protected readonly userService: UserService,
+    private readonly reflector: Reflector
   ) {}
 
   protected abstract getSecretKey(): string;
   protected abstract handleValidatedUser(user: any, request: Request): void;
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.isPublicRoute(context);
+
+    // for public routes
+    if (isPublic) return true;
+
     const request = this.getRequest(context);
     const token = this.extractToken(request);
     const payload = await this.verifyToken(token);
@@ -33,6 +41,13 @@ export abstract class BaseAuthStrategy implements CanActivate {
 
     this.handleValidatedUser(user, request);
     return true;
+  }
+
+  private isPublicRoute(context: ExecutionContext) {
+    return this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
   }
 
   private getRequest(context: ExecutionContext): Request {
@@ -56,12 +71,9 @@ export abstract class BaseAuthStrategy implements CanActivate {
   }
 
   private async validateUser(payload: JWTPayload) {
-    const user = await this.userService.getUserById(payload.sub);
-
-    if (!user) {
-      throw new AppError('User not found', HttpStatus.NOT_FOUND);
-    }
-
-    return user;
+    // There would be no need t perform a check.
+    // The user service already checks and throws an error
+    // if no user is found. So just return the data from the service
+    return await this.userService.getUserById(payload.sub);
   }
 }

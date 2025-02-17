@@ -11,8 +11,9 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: '*',
+      origin: process.env.NODE_ENV !== Environment.PRODUCTION && '*',
       credentials: true,
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     },
   });
 
@@ -31,14 +32,21 @@ async function bootstrap() {
     app.use(morgan('dev'));
   }
 
+  // prefix all routes with leading 'api' prefix
+  const GLOBAL_PREFIX = 'api/';
+  app.setGlobalPrefix(GLOBAL_PREFIX);
+
   await app.listen(process.env.PORT ?? 4000, async () => {
-    new Logger('AppLogStarter').log(`App is running on: ${process.env.PORT}`);
+    new Logger('AppLogStarter').log(
+      `App is running on: ${process.env.PORT}/${GLOBAL_PREFIX}`
+    );
   });
 
   process.on(Signals.UNHANDLED_REJECTION, async (reason: any) => {
     console.error(`Unhandled rejection, reason: ${reason.message}`);
 
     await app.close();
+    process.exit(1);
   });
 
   process.on(Signals.SIGTERM, async () => {
