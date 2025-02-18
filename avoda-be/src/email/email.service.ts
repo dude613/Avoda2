@@ -8,7 +8,7 @@ import { MailOptions } from 'nodemailer/lib/json-transport';
 export class EmailService {
   constructor(
     @InjectQueue('avoda-redis-email-queue')
-    private emailQueue: Queue,
+    private emailQueue: Queue
   ) {}
 
   async sendEmailAsync(emailData: MailOptions) {
