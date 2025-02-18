@@ -3,6 +3,9 @@ import { Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@/auth/access-token.guard';
 import { RequirePermissions } from '@/decorators/require-permissions.decorator';
 
+import { CurrentUser } from '@/decorators/current-user.decorator';
+import { User } from '@/entities/user.entity';
+
 import { USER_PERMISSIONS } from '@/enums/permissions.enum';
 import { PermissionsGuard } from '@/shared/guards/permissions.guard';
 
@@ -27,9 +30,24 @@ export class MembersController {
     USER_PERMISSIONS.ROOT_PERMISSION,
     USER_PERMISSIONS.READ_ORGANIZATION
   )
+  getCurrentUserOrganizationProfile(
+    @Param('id') id: string,
+    @CurrentUser() user: Partial<User>
+  ) {
+    return this.orgMembersService.getCurrentUserOrganizationProfile(
+      user.id,
+      id
+    );
+  }
+
+  @Get('/profile/:memberId')
+  @RequirePermissions(
+    USER_PERMISSIONS.ROOT_PERMISSION,
+    USER_PERMISSIONS.READ_ORGANIZATION
+  )
   getMemberProfile(
     @Param('id') id: string,
-    @Param(':memberId') memberId: string
+    @Param('memberId') memberId: string
   ) {
     return this.orgMembersService.getMemberProfile(memberId, id);
   }

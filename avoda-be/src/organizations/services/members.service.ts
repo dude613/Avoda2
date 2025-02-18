@@ -44,8 +44,35 @@ export class MemberService {
       .leftJoinAndSelect('m.permissions', 'p')
       .leftJoinAndSelect('m.user', 'u')
       .where({ organization: { id: orgId }, id })
-      .andWhere('m.user.id := m.id')
       .getOne();
+
+    if (!member) {
+      throw new AppError(
+        `Member not found in the organization. member with id ${id} does not exist`,
+        HttpStatus.NOT_FOUND
+      ); // If member not found, throw error with 404 status code
+    }
+
+    return {
+      ...member,
+      permissions: member.permissions.map((perm) => perm.permission), // Extract only the permission string
+    };
+  }
+
+  async getCurrentUserOrganizationProfile(id: string, orgId: string) {
+    const member = await this.membersEntity
+      .createQueryBuilder('m')
+      .leftJoinAndSelect('m.permissions', 'p')
+      .leftJoinAndSelect('m.user', 'u')
+      .where({ organization: { id: orgId }, user: { id } })
+      .getOne();
+
+    if (!member) {
+      throw new AppError(
+        `Member not found in the organization. member with id ${id} does not exist`,
+        HttpStatus.NOT_FOUND
+      ); // If member not found, throw error with 404 status code
+    }
 
     return {
       ...member,
