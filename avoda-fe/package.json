@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@nuxtjs/tailwindcss": "6.13.1",
-    "@supabase/supabase-js": "^2.48.0",
     "@tailwindcss/vite": "^4.0.0",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
