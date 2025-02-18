@@ -43,8 +43,8 @@ export class MemberService {
       .createQueryBuilder('m')
       .leftJoinAndSelect('m.permissions', 'p')
       .leftJoinAndSelect('m.user', 'u')
-      .where({ organization: { id: orgId } })
-      .andWhere({ user: { id } })
+      .where({ organization: { id: orgId }, id })
+      .andWhere('m.user.id := m.id')
       .getOne();
 
     return {
