@@ -1,41 +1,33 @@
 <script setup lang="ts">
-import { createClient } from '@supabase/supabase-js';
 const runTimeConfig = useRuntimeConfig();
 
 useHead({
-  title: 'Caliber6 | Employment Management System',
+  title: 'Avoda | Employment Management System',
   meta: [
     {
       name: 'description',
       content:
-        'Caliber6 is an employment management system built to streamline the job search process for employees.',
+        'Avoda is an employment management system built to streamline the job search process for employees.',
     },
   ],
 });
 
-const supabase = createClient(
-  runTimeConfig.public.SUPABASE_PROJECT_URL.replace(
-    '<project>',
-    runTimeConfig.public.PROJECT_NAME
-  ),
-  runTimeConfig.public.SUPABASE_ANON_KEY
-);
 
 const marketing_content = [
   {
     title: 'employee management',
     description:
-      'Create and manage job postings with Caliber6, streamlining the application process.',
+      'Create and manage job postings with Avoda, streamlining the application process.',
   },
   {
     title: 'performance tracking',
     description:
-      'Create and manage job postings with Caliber6, streamlining the application process.',
+      'Create and manage job postings with Avoda, streamlining the application process.',
   },
   {
     title: 'secure access',
     description:
-      'Create and manage job postings with Caliber6, streamlining the application process.',
+      'Create and manage job postings with Avoda, streamlining the application process.',
   },
 ];
 
@@ -50,14 +42,6 @@ const updatePasswordModelValue = (e: string) => {
   password.value = e;
 };
 
-const loginWithPassword = async () => {
-  const data = await supabase.auth.signInWithPassword({
-    email: email.value,
-    password: password.value,
-  });
-
-  console.log(data.data);
-};
 </script>
 
 <template>
