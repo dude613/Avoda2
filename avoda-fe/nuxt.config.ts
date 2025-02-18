@@ -15,7 +15,7 @@ export default defineNuxtConfig({
      * Directory that the component lives in.
      * @default "./components/ui"
      */
-    componentDir: './components/ui'
+    componentDir: './components/ui',
   },
   vite: {
     plugins: [tailwindcss()],
@@ -24,8 +24,6 @@ export default defineNuxtConfig({
     port: 4000,
   },
   runtimeConfig: {
-    public: {
-      PROJECT_NAME: import.meta.env.PROJECT_NAME
-    },
+    public: {},
   },
 });
