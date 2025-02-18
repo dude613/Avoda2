@@ -1,8 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { Not, Repository } from 'typeorm';
+
+import { AppError } from '@/shared/appError.util';
+import { USER_ROLES } from '@/shared/constants/user-role.constants';
+import { ORGANIZATIONS_MEMBERS_REPOSITORY } from '@/shared/constants/database.constants';
 
 import { OrganizationMembers } from '@/entities/org-member.entity';
-import { ORGANIZATIONS_MEMBERS_REPOSITORY } from '@/shared/constants/database.constants';
 
 @Injectable()
 export class MemberService {
@@ -48,5 +51,22 @@ export class MemberService {
       ...member,
       permissions: member.permissions.map((perm) => perm.permission), // Extract only the permission string
     };
+  }
+
+  async removeMemberFromOrganization(id: string, orgId: string) {
+    const res = await this.membersEntity.softDelete({
+      id,
+      organization: { id: orgId },
+      role: Not(USER_ROLES.OWNER),
+    });
+
+    if (!res.affected) {
+      throw new AppError(
+        'Unable to remove member from organization. Please try again',
+        HttpStatus.UNPROCESSABLE_ENTITY
+      );
+    }
+
+    return 'Member deleted successfully';
   }
 }

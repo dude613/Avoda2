@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
 
 import { AuthGuard } from '@/auth/access-token.guard';
 import { RequirePermissions } from '@/decorators/require-permissions.decorator';
@@ -13,23 +13,39 @@ import { MemberService } from '../services/members.service';
 
 @Controller('organizations/:id/members')
 @UseGuards(AuthGuard, PermissionsGuard)
-@RequirePermissions(
-  USER_PERMISSIONS.ROOT_PERMISSION,
-  USER_PERMISSIONS.READ_ORGANIZATION
-)
 export class MembersController {
   constructor(private readonly orgMembersService: MemberService) {}
 
   @Get()
+  @RequirePermissions(
+    USER_PERMISSIONS.ROOT_PERMISSION,
+    USER_PERMISSIONS.READ_ORGANIZATION
+  )
   getMembers(@Param('id') id: string) {
     return this.orgMembersService.getMembers(id);
   }
 
   @Get('/profile')
+  @RequirePermissions(
+    USER_PERMISSIONS.ROOT_PERMISSION,
+    USER_PERMISSIONS.READ_ORGANIZATION
+  )
   getMemberProfile(
     @Param('id') id: string,
     @CurrentUser() user: Partial<User>
   ) {
     return this.orgMembersService.getMemberProfile(user.id, id);
+  }
+
+  @Delete('/:memberId')
+  @RequirePermissions(
+    USER_PERMISSIONS.ROOT_PERMISSION,
+    USER_PERMISSIONS.DELETE_USER
+  )
+  removeMemberFromOrganization(
+    @Param('id') id: string,
+    @Param('memberId') memberId: string
+  ) {
+    return this.orgMembersService.removeMemberFromOrganization(memberId, id);
   }
 }
