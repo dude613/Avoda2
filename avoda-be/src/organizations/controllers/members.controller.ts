@@ -1,9 +1,12 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
 
 import { AuthGuard } from '@/auth/access-token.guard';
 import { RequirePermissions } from '@/decorators/require-permissions.decorator';
 import { CurrentUser } from '@/decorators/current-user.decorator';
 
+import { User } from '@/entities/user.entity';
+
+import { CurrentUser } from '@/decorators/current-user.decorator';
 import { User } from '@/entities/user.entity';
 
 import { USER_PERMISSIONS } from '@/enums/permissions.enum';
@@ -13,23 +16,54 @@ import { MemberService } from '../services/members.service';
 
 @Controller('organizations/:id/members')
 @UseGuards(AuthGuard, PermissionsGuard)
-@RequirePermissions(
-  USER_PERMISSIONS.ROOT_PERMISSION,
-  USER_PERMISSIONS.READ_ORGANIZATION
-)
 export class MembersController {
   constructor(private readonly orgMembersService: MemberService) {}
 
   @Get()
+  @RequirePermissions(
+    USER_PERMISSIONS.ROOT_PERMISSION,
+    USER_PERMISSIONS.READ_ORGANIZATION
+  )
   getMembers(@Param('id') id: string) {
     return this.orgMembersService.getMembers(id);
   }
 
   @Get('/profile')
-  getMemberProfile(
+  @RequirePermissions(
+    USER_PERMISSIONS.ROOT_PERMISSION,
+    USER_PERMISSIONS.READ_ORGANIZATION
+  )
+  getCurrentUserOrganizationProfile(
     @Param('id') id: string,
     @CurrentUser() user: Partial<User>
   ) {
-    return this.orgMembersService.getMemberProfile(user.id, id);
+    return this.orgMembersService.getCurrentUserOrganizationProfile(
+      user.id,
+      id
+    );
+  }
+
+  @Get('/profile/:memberId')
+  @RequirePermissions(
+    USER_PERMISSIONS.ROOT_PERMISSION,
+    USER_PERMISSIONS.READ_ORGANIZATION
+  )
+  getMemberProfile(
+    @Param('id') id: string,
+    @Param('memberId') memberId: string
+  ) {
+    return this.orgMembersService.getMemberProfile(memberId, id);
+  }
+
+  @Delete('/:memberId')
+  @RequirePermissions(
+    USER_PERMISSIONS.ROOT_PERMISSION,
+    USER_PERMISSIONS.DELETE_USER
+  )
+  removeMemberFromOrganization(
+    @Param('id') id: string,
+    @Param('memberId') memberId: string
+  ) {
+    return this.orgMembersService.removeMemberFromOrganization(memberId, id);
   }
 }
