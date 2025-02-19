@@ -1,25 +1,40 @@
-import tailwindcss from '@tailwindcss/vite';
+// import tailwindcss from '@tailwindcss/vite';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
-  css: ['~/assets/css/main.css'],
-  modules: ['@vueuse/nuxt'],
-
-  vite: {
-    plugins: [tailwindcss()],
+  // css: ['~/assets/css/main.css'],
+  modules: ['@vueuse/nuxt', '@nuxtjs/tailwindcss', 'shadcn-nuxt'],
+  shadcn: {
+    /**
+     * Prefix for all the imported component
+     */
+    prefix: '',
+    /**
+     * Directory that the component lives in.
+     * @default "./components/ui"
+     */
+    componentDir: './components/ui',
   },
+  // vite: {
+  //   plugins: [tailwindcss()],
+  // },
   devServer: {
     port: 4000,
   },
   runtimeConfig: {
-    public: {
-      PROJECT_NAME: import.meta.env.PROJECT_NAME,
-      SUPABASE_PROJECT_URL: import.meta.env.SUPABASE_PROJECT_URL,
-      SUPABASE_ANON_KEY: import.meta.env.SUPABASE_PROJECT_KEY,
-      SUPABASE_SERVICE_ROLE_KEY: import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
-      BASE_URL: import.meta.env.BASE_URL,
-    },
+    public : {
+      BASE_URL : import.meta.env.BASE_URL
+    }
+   
+
+
+
+
+
+
+
+
   },
 });

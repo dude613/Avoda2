@@ -2,6 +2,9 @@ import { Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
 
 import { AuthGuard } from '@/auth/access-token.guard';
 import { RequirePermissions } from '@/decorators/require-permissions.decorator';
+import { CurrentUser } from '@/decorators/current-user.decorator';
+
+import { User } from '@/entities/user.entity';
 
 import { CurrentUser } from '@/decorators/current-user.decorator';
 import { User } from '@/entities/user.entity';
