@@ -13,10 +13,10 @@ export const useTimeTracker = () => {
 
   const entry = computed({
     get() {
-      return JSON.parse(currentEntry.value);
+      return currentEntry.value ? JSON.parse(currentEntry.value) : null;
     },
     set(value: any) {
-      currentEntry.value = JSON.stringify(value);
+      currentEntry.value = value ? JSON.stringify(value) : null;
     },
   });
 

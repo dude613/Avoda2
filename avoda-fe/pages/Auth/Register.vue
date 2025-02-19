@@ -1,6 +1,5 @@
 <template>
-    <div>
-      <AuthRegister />
-    </div>
-  </template>
- 
+  <div>
+    <AuthRegister />
+  </div>
+</template>
