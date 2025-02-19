@@ -47,23 +47,6 @@ export const useApi = () => {
       }
       if (error.response?.status === 401) {
         token.value = '';
-      } else if (error.response?.status === 403) {
-        // Handle 403 Forbidden errors
-        // redirect user to previous page
-      }
-      return Promise.reject(error);
-    }
-  );
-
-  // Response interceptor
-  api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-      // Handle 401 Unauthorized errors
-      if (error.response?.status === 401) {
-        // Clear token and redirect to login
-        token.value = '';
-        // You might want to add router navigation here
         router.push('/');
       } else if (error.response?.status === 403) {
         // Handle 403 Forbidden errors
