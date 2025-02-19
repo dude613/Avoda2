@@ -66,10 +66,30 @@ export class PermissionsService {
     return 'Permission(s) granted successfully';
   }
 
-  async revokePermissions() {
-    // find the user
-  }
-  async revokePermission(id: string) {}
+  async revokePermission(id: string, memberId: string) {
+    // find the permission using the id provided
+    const permission = await this.permissionsEntity.findOneBy({
+      id,
+      member: { id: memberId },
+    });
 
-  async getPermissions(memberId: string) {}
+    if (!permission) {
+      throw new AppError(
+        `No permission found with this id : ${id}`,
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    await this.permissionsEntity.remove(permission);
+
+    return 'Permission revoked successfully';
+  }
+
+  async getPermissions(memberId: string) {
+    const permissions = await this.permissionsEntity.find({
+      where: { member: { id: memberId } },
+    });
+
+    return permissions;
+  }
 }
