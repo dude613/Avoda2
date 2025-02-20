@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useLocalStorage } from '@vueuse/core';
-
 const runTimeConfig = useRuntimeConfig();
 
 const { post } = useApi();
@@ -33,46 +32,6 @@ const marketing_content = [
       'Create and manage job postings with Caliber6, streamlining the application process.',
   },
 ];
-
-const email = ref<string>('');
-const password = ref<string>('');
-
-const updateEmailModelValue = (e: string) => {
-  email.value = e;
-};
-
-const updatePasswordModelValue = (e: string) => {
-  password.value = e;
-};
-
-const loginWithPassword = async () => {
-  const data = await post<any>(
-    `${runTimeConfig.public.BASE_URL}/auth/login-with-password`,
-    {
-      email: email.value,
-      password: password.value,
-    }
-  );
-
-  console.log(data.data, 'data...');
-
-  // set relevant data in local storage
-  useLocalStorage('USER_DATA', data.data.user, {
-    flush: 'sync',
-    deep: true,
-  });
-  useLocalStorage('ACCESS_TOKEN', data.data.tokens.accessToken, {
-    flush: 'sync',
-  });
-
-  useLocalStorage('REFRESH_TOKEN', data.data.tokens.refreshToken, {
-    flush: 'sync',
-  });
-
-  // reset states
-  // email.value = '';
-  // password.value = '';
-};
 </script>
 
 <template>
@@ -108,35 +67,5 @@ const loginWithPassword = async () => {
 
   <section>
     <Timer />
-  </section>
-
-  <section class="flex justify-center mt-6">
-    <form class="w-full md:w-1/3 p-5 [&>*:not(:last-child)]:mb-5">
-      <p class="font-md capitalize text-lg">authentication</p>
-      <form-app-input
-        inputLabel="email"
-        id="email"
-        inputType="email"
-        v-model="email"
-        @update:model-value="updateEmailModelValue"
-        placeholder="johndoe@email.com"
-      />
-
-      <form-app-input
-        inputLabel="password"
-        id="password"
-        placeholder="Enter Password"
-        inputType="password"
-        v-model="password"
-        @update:model-value="updatePasswordModelValue"
-      />
-
-      <app-button
-        text="sign in"
-        variant="tertiary"
-        @click.prevent="loginWithPassword"
-        class="min-w-full"
-      />
-    </form>
   </section>
 </template>
