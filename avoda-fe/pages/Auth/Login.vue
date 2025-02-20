@@ -5,7 +5,7 @@
   </template>
   
   <script setup>
-  import AuthLogin from "~/components/Auth/Login.vue";
+  import AuthLogin from "~/components/auth/login.vue";
   definePageMeta({
   layout: "auth",
 });
