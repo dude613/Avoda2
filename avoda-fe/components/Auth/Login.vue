@@ -37,6 +37,7 @@
   </div>
 </template>
 
+<<<<<<< HEAD
  
 <script setup lang="ts">
 import { useLocalStorage } from '@vueuse/core';
@@ -70,3 +71,21 @@ const loginWithPassword = async () => {
   });router.push("/")}
 </script> 
 
+=======
+<script setup>
+import { ref } from 'vue';
+
+const email = ref('');
+const password = ref('');
+
+const handleLogin = () => {
+  console.log('Logging in with:', email.value, password.value);
+};
+</script>
+
+<style scoped>
+input {
+  border: 1px solid #ddd;
+}
+</style>
+>>>>>>> staging

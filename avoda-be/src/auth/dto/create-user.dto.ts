@@ -9,20 +9,21 @@ import {
   MinLength,
 } from 'class-validator';
 import { IsTrimmed } from '@/decorators/isTrimmed.decorator';
+import { Matcher } from '@/decorators/matcher.decorator';
 
 export class CreateUserDTO {
-  @IsString({ message: '' })
-  @IsNotEmpty({ message: '' })
+  @IsString()
+  @IsNotEmpty()
   @IsTrimmed()
   firstName: string;
 
-  @IsString({ message: '' })
-  @IsNotEmpty({ message: '' })
+  @IsString()
+  @IsNotEmpty()
   @IsTrimmed()
   lastName: string;
 
-  @IsString({ message: '' })
-  @IsNotEmpty({ message: '' })
+  @IsString()
+  @IsNotEmpty()
   @MinLength(8)
   @MaxLength(20)
   @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
@@ -32,8 +33,13 @@ export class CreateUserDTO {
   @IsTrimmed()
   password: string;
 
-  @IsString({ message: '' })
-  @IsNotEmpty({ message: '' })
+  @IsString()
+  @IsNotEmpty()
+  @Matcher('password', { message: 'Passwords do not match' })
+  confirmPassword: string;
+
+  @IsString()
+  @IsNotEmpty()
   @IsEmail()
   @IsTrimmed()
   email: string;

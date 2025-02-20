@@ -1,9 +1,12 @@
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
 
+import { useToast } from '@/components/ui/toast/use-toast';
+
 export const useApi = () => {
   const runtimeConfig = useRuntimeConfig();
   const router = useRouter();
+  const { toast } = useToast();
 
   const token = ref<string | null>(null);
 
@@ -47,10 +50,25 @@ export const useApi = () => {
       }
       if (error.response?.status === 401) {
         token.value = '';
+        toast({
+          title: 'Unauthorized',
+          description: 'Session expired. Please login again!',
+        });
         router.push('/');
       } else if (error.response?.status === 403) {
         // Handle 403 Forbidden errors
         // redirect user to previous page
+        toast({
+          title: 'Forbidden',
+          description: 'You do not have permission to access this resource',
+        });
+
+        if (router.getRoutes().length) {
+          // take the user back to the previous page
+          router.go(-1);
+        } else {
+          router.push('/');
+        }
       }
       return Promise.reject(error);
     }
