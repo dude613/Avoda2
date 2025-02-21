@@ -1,11 +1,11 @@
 <template>
-    <div>
-      <AuthRegister />
-    </div>
-  </template>
- 
- <script setup>
+  <div>
+    <AuthRegister />
+  </div>
+</template>
+
+<script setup>
 definePageMeta({
-  layout: "auth",
+  layout: false,
 });
 </script>
