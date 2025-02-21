@@ -5,6 +5,13 @@
       <p class="text-gray-500 text-center mb-6">
         Enter your credentials to access your account
       </p>
+      <label class="block mb-2 text-sm font-medium text-black">Email</label>
+      <Button
+        class="w-full max-w-[400px] flex items-center justify-center gap-3 p-3 border border-gray-300 bg-white text-black shadow-sm hover:bg-white"
+      >
+        <Google class="w-6 h-6" />
+        <span class="text-base font-normal"> Google</span>
+      </Button>
 
       <div class="flex items-center my-4">
         <hr class="flex-grow border-gray-300" />
@@ -62,13 +69,12 @@
 </template>
 
 <script setup lang="ts">
-import { useLocalStorage } from '@vueuse/core';
+import Google from '@/components/icons/google.vue';
 const runTimeConfig = useRuntimeConfig();
 const { post } = useApi();
 
 const email = ref('');
 const password = ref('');
-const errorMessage = ref('');
 const router = useRouter();
 
 const loginWithPassword = async () => {
