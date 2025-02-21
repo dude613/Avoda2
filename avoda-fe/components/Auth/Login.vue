@@ -5,7 +5,7 @@
       <p class="text-gray-500 text-center mb-6">
         Enter your credentials to access your account
       </p>
-
+      <label class="block mb-2 text-sm font-medium text-black">Email</label>
       <Button
         class="w-full max-w-[400px] flex items-center justify-center gap-3 p-3 border border-gray-300 bg-white text-black shadow-sm hover:bg-white"
       >

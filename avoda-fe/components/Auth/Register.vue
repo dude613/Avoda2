@@ -4,6 +4,7 @@
       <h2 class="auth-title">Register</h2>
       <p class="auth-subtitle">Create an account to get started</p>
 
+      <label class="block mb-2 text-sm font-medium text-black">Email</label>
       <Button
         class="w-full max-w-[400px] flex items-center justify-center gap-3 p-3 border border-gray-300 bg-white text-black shadow-sm hover:bg-white"
       >
@@ -11,7 +12,11 @@
         <span class="text-base font-normal"> Google</span>
       </Button>
 
-      <div class="divider">OR</div>
+      <div class="flex items-center my-4">
+        <hr class="flex-grow border-gray-300" />
+        <span class="px-2 text-gray-400 text-sm">OR</span>
+        <hr class="flex-grow border-gray-300" />
+      </div>
 
       <form @submit.prevent="handleRegister">
         <div class="input-group">
