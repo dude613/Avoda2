@@ -5,7 +5,14 @@
       <p class="text-gray-500 text-center mb-6">
         Enter your credentials to access your account
       </p>
-      gi
+
+      <Button
+        class="w-full max-w-[400px] flex items-center justify-center gap-3 p-3 border border-gray-300 bg-white text-black shadow-sm hover:bg-white"
+      >
+        <Google class="w-6 h-6" />
+        <span class="text-base font-normal"> Google</span>
+      </Button>
+
       <div class="flex items-center my-4">
         <hr class="flex-grow border-gray-300" />
         <span class="px-2 text-gray-400 text-sm">OR CONTINUE WITH</span>
@@ -62,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import Google from '@/components/icons/google.vue';
 const runTimeConfig = useRuntimeConfig();
 const { post } = useApi();
 

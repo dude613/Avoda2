@@ -4,36 +4,73 @@
       <h2 class="auth-title">Register</h2>
       <p class="auth-subtitle">Create an account to get started</p>
 
+      <Button
+        class="w-full max-w-[400px] flex items-center justify-center gap-3 p-3 border border-gray-300 bg-white text-black shadow-sm hover:bg-white"
+      >
+        <Google class="w-9 h-9" />
+        <span class="text-base font-normal"> Google</span>
+      </Button>
+
       <div class="divider">OR</div>
 
       <form @submit.prevent="handleRegister">
         <div class="input-group">
           <label for="first-name">First Name</label>
-          <input type="text" id="first-name" v-model="firstName" placeholder="Enter your first name" required />
+          <input
+            type="text"
+            id="first-name"
+            v-model="firstName"
+            placeholder="Enter your first name"
+            required
+          />
         </div>
 
         <div class="input-group">
           <label for="last-name">Last Name</label>
-          <input type="text" id="last-name" v-model="lastName" placeholder="Enter your last name" required />
+          <input
+            type="text"
+            id="last-name"
+            v-model="lastName"
+            placeholder="Enter your last name"
+            required
+          />
         </div>
 
         <div class="input-group">
           <label for="email">Email</label>
-          <input type="email" id="email" v-model="email" placeholder="Enter your email" required />
+          <input
+            type="email"
+            id="email"
+            v-model="email"
+            placeholder="Enter your email"
+            required
+          />
         </div>
 
         <div class="input-group">
           <label for="password">Password</label>
-          <input type="password" id="password" v-model="password" placeholder="Create a password" required />
+          <input
+            type="password"
+            id="password"
+            v-model="password"
+            placeholder="Create a password"
+            required
+          />
         </div>
 
         <div class="input-group">
           <label for="confirm-password">Confirm Password</label>
-          <input type="password" id="confirm-password" v-model="confirmPassword" placeholder="Re-enter your password" required />
+          <input
+            type="password"
+            id="confirm-password"
+            v-model="confirmPassword"
+            placeholder="Re-enter your password"
+            required
+          />
         </div>
 
         <Button class="w-full" :disabled="loading">
-          {{ loading ? "Registering..." : "Sign up" }}
+          {{ loading ? 'Registering...' : 'Sign up' }}
         </Button>
       </form>
 
@@ -43,69 +80,68 @@
 
       <p class="auth-footer text-gray-500 text-sm">
         Already have an account?
-        <router-link to="/auth/login" class="text-black font-semibold">Login</router-link>
+        <router-link to="/auth/login" class="text-black font-semibold"
+          >Login</router-link
+        >
       </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { Button } from "@/components/ui/button";
-
+import { Button } from '@/components/ui/button';
+import Google from '@/components/icons/google.vue';
 const runTimeConfig = useRuntimeConfig();
 const { post } = useApi();
 
-const firstName = ref("");
-const lastName = ref("");
-const email = ref("");
-const password = ref("");
-const confirmPassword = ref("");
-const errorMessage = ref("");
+const firstName = ref('');
+const lastName = ref('');
+const email = ref('');
+const password = ref('');
+const confirmPassword = ref('');
+const errorMessage = ref('');
 const loading = ref(false);
 const router = useRouter();
 
 const handleRegister = async () => {
   if (password.value !== confirmPassword.value) {
-    errorMessage.value = "Passwords do not match!";
+    errorMessage.value = 'Passwords do not match!';
     return;
   }
 
   loading.value = true;
-  errorMessage.value = "";
+  errorMessage.value = '';
 
   try {
-  const data = await post(
-    `${runTimeConfig.public.BASE_URL}/auth/signup-with-password`,
-    {
-      email: email.value,
-      password: password.value,
-      confirmPassword: confirmPassword.value,
-      firstName: firstName.value,
-      lastName: lastName.value,
+    const data = await post(
+      `${runTimeConfig.public.BASE_URL}/auth/signup-with-password`,
+      {
+        email: email.value,
+        password: password.value,
+        confirmPassword: confirmPassword.value,
+        firstName: firstName.value,
+        lastName: lastName.value,
+      }
+    );
+
+    console.log('Registration successful:', data.data);
+    router.push('/auth/login');
+  } catch (error) {
+    console.error('Registration error:', error);
+
+    if (error?.response?.status === 400) {
+      errorMessage.value =
+        'Password must contain at least one uppercase letter, one symbol, and one number.';
+    } else if (error?.response?.status === 401) {
+      errorMessage.value = 'Unauthorized. Please check your credentials.';
+    } else if (error?.response?.status === 409) {
+      errorMessage.value = 'An account with this email already exists.';
+    } else {
+      errorMessage.value = 'Registration failed. Please try again.';
     }
-  );
-
-  console.log("Registration successful:", data.data);
-
-
-  router.push("/auth/login");
-} catch (error) {
-  console.error("Registration error:", error);
-
-  if (error?.response?.status === 400) {
-    errorMessage.value = "Invalid input. Please check your details.";
-  } else if (error?.response?.status === 401) {
-    errorMessage.value = "Unauthorized. Please check your credentials.";
-  } else if (error?.response?.status === 409) {
-    errorMessage.value = "An account with this email already exists.";
-  } else {
-    errorMessage.value = "Registration failed. Please try again.";
+  } finally {
+    loading.value = false;
   }
-} finally {
-  loading.value = false;
-}
-
-
 };
 </script>
 
