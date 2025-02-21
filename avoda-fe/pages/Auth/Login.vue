@@ -1,13 +1,11 @@
-<template>
-    <div>
-      <AuthLogin />
-    </div>
-  </template>
-  
-  <script setup>
-  import AuthLogin from "~/components/Auth/Login.vue";
-  definePageMeta({
-  layout: "auth",
+<script setup lang="ts">
+definePageMeta({
+  layout: false,
 });
-  </script>
-  
+</script>
+
+<template>
+  <div>
+    <AuthLogin />
+  </div>
+</template>

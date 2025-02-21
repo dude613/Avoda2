@@ -1,5 +1,3 @@
-// import tailwindcss from '@tailwindcss/vite';
-
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -24,17 +22,17 @@ export default defineNuxtConfig({
     port: 4000,
   },
   runtimeConfig: {
-    public : {
-      BASE_URL : import.meta.env.BASE_URL
-    }
-   
-
-
-
-
-
-
-
-
+    public: {
+      BASE_URL: import.meta.env.BASE_URL,
+    },
+  },
+  routeRules: {
+    '/': {
+      ssr: false,
+    },
+    '/dashboard/**': {
+      ssr: false,
+      swr: true,
+    },
   },
 });
