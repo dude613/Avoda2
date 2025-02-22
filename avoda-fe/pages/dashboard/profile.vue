@@ -6,45 +6,20 @@
         <CardDescription>View your account details</CardDescription>
       </CardHeader>
       <CardContent>
-        <div class="profile-info">
+        <div class="profile-info" v-if="user">
+          <div class="info-item">
+            <span class="label">ID:</span>
+            <span class="value">{{ user.id }}</span>
+          </div>
           <div class="info-item">
             <span class="label">Name:</span>
-            <span class="value">{{ user.name }}</span>
+            <span class="value"
+              >{{ user.first_name }} {{ user.last_name }}</span
+            >
           </div>
           <div class="info-item">
             <span class="label">Email:</span>
             <span class="value">{{ user.email }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Registration Date:</span>
-            <span class="value">{{ user.registrationDate }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Last Login:</span>
-            <span class="value">{{ user.lastLogin }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Status:</span>
-            <span class="value">{{ user.status }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Assigned Roles:</span>
-            <span class="value">{{ user.roles.join(', ') }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Department:</span>
-            <span class="value">{{ user.department }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Default Billable Rate:</span>
-            <span class="value">{{ user.billableRate }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">Hours Tracked:</span>
-            <span class="value"
-              >24H: {{ user.hoursTracked24h }}, 7D:
-              {{ user.hoursTracked7d }}</span
-            >
           </div>
         </div>
       </CardContent>
@@ -53,7 +28,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import {
   Card,
   CardHeader,
@@ -61,19 +37,29 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
+import axios from 'axios';
+import { useRuntimeConfig } from '#imports';
 
-const user = ref({
-  name: 'John Doe',
-  email: 'johndoe@example.com',
-  registrationDate: '2023-05-15',
-  lastLogin: '2025-02-21 10:45 AM',
-  status: 'Active',
-  roles: ['Admin', 'Manager'],
-  department: 'Engineering',
-  billableRate: '$50/hr',
-  hoursTracked24h: 8,
-  hoursTracked7d: 40,
-});
+const config = useRuntimeConfig();
+const route = useRoute();
+const user = ref(null);
+
+const fetchUserProfile = async () => {
+  try {
+    const { id } = route.params;
+    const response = await axios.get(
+      `${config.public.BASE_URL}/organizations/${id}/members/profile`,
+      {
+        withCredentials: true,
+      }
+    );
+    user.value = response.data;
+  } catch (error) {
+    console.error('Failed to fetch user profile:', error);
+  }
+};
+
+onMounted(fetchUserProfile);
 </script>
 
 <style scoped>
