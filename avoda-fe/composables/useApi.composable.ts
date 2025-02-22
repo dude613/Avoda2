@@ -49,7 +49,7 @@ export const useApi = () => {
         throw new Error('Request timeout - please try again');
       }
       if (error.response?.status === 401) {
-        token.value = '';
+        token.value = null;
         toast({
           title: 'Unauthorized',
           description: 'Session expired. Please login again!',

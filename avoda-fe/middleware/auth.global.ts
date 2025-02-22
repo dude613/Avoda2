@@ -6,7 +6,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     if (!token.value && !to.path.startsWith('/auth')) {
       // make sure to redirect to login if token is not present & the user is not on any auth page
-      // setPageLayout('auth');
       return navigateTo('/auth/login');
     }
   }
