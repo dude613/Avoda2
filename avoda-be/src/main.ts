@@ -11,7 +11,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: process.env.NODE_ENV !== Environment.PRODUCTION && '*',
+      origin: ['https://fe-staging.up.railway.app/', 'http://127.0.1:4000'],
       credentials: true,
       allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     },

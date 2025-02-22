@@ -15,9 +15,6 @@ export default defineNuxtConfig({
      */
     componentDir: './components/ui',
   },
-  // vite: {
-  //   plugins: [tailwindcss()],
-  // },
   devServer: {
     port: 4000,
   },
