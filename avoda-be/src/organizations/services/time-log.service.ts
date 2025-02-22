@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 
 import { TIME_LOG_REPOSITORY } from '@/shared/constants/database.constants';
 import { AppError } from '@/shared/appError.util';
@@ -29,15 +29,33 @@ export class TimeLogService {
   }
 
   async startTime(user: Partial<User>) {
-    const timeLog = this.timeLogRepository.create({
-      status: TimeLogStatus.STARTED,
-      startTime: new Date(),
-      user: { id: user.id },
+    return await this.timeLogRepository.manager.transaction(async (tnx) => {
+      // Check for existing active time logs
+      const existingActiveLog = await tnx
+        .getRepository(TimeLog)
+        .createQueryBuilder('time_log')
+        .setLock('pessimistic_write')
+        .where({
+          user: { id: user.id },
+          status: In([TimeLogStatus.STARTED, TimeLogStatus.PAUSED]),
+        })
+        .getOne();
+
+      if (existingActiveLog) {
+        throw new AppError(
+          'User already has an active time log',
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      const timeLog = tnx.create(TimeLog, {
+        status: TimeLogStatus.STARTED,
+        startTime: new Date(),
+        user: { id: user.id },
+      });
+
+      return await tnx.save(timeLog);
     });
-
-    const result = await this.timeLogRepository.save(timeLog);
-
-    return result;
   }
 
   async pauseTracking(id: string) {

@@ -9,7 +9,7 @@ export class RefreshTokenGuard extends BaseAuthStrategy {
     return 'JWT_REFRESH_SECRET';
   }
 
-  protected handleValidatedUser(user: any, request: Request): void {
+  protected handleValidatedUser(user: any, @Req() request: Request): void {
     request['user'] = user;
   }
 }

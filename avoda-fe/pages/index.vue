@@ -1,10 +1,4 @@
 <script setup lang="ts">
-import { useLocalStorage } from '@vueuse/core';
-
-const runTimeConfig = useRuntimeConfig();
-
-const { post } = useApi();
-
 useHead({
   title: 'Caliber6 | Employment Management System',
   meta: [
@@ -33,110 +27,42 @@ const marketing_content = [
       'Create and manage job postings with Caliber6, streamlining the application process.',
   },
 ];
-
-const email = ref<string>('');
-const password = ref<string>('');
-
-const updateEmailModelValue = (e: string) => {
-  email.value = e;
-};
-
-const updatePasswordModelValue = (e: string) => {
-  password.value = e;
-};
-
-const loginWithPassword = async () => {
-  const data = await post<any>(
-    `${runTimeConfig.public.BASE_URL}/auth/login-with-password`,
-    {
-      email: email.value,
-      password: password.value,
-    }
-  );
-
-  console.log(data.data, 'data...');
-
-  // set relevant data in local storage
-  useLocalStorage('USER_DATA', data.data.user, {
-    flush: 'sync',
-    deep: true,
-  });
-  useLocalStorage('ACCESS_TOKEN', data.data.tokens.accessToken, {
-    flush: 'sync',
-  });
-
-  useLocalStorage('REFRESH_TOKEN', data.data.tokens.refreshToken, {
-    flush: 'sync',
-  });
-
-  // reset states
-  // email.value = '';
-  // password.value = '';
-};
 </script>
 
 <template>
-  <section class="text-center m-16 sm:m-8 sm:p-4">
-    <div class="flex flex-col justify-center">
-      <h1 class="capitalize">employment management system</h1>
-      <p class="text-center mx-auto sm:w-full lg:w-1/2">
-        Streamline your workforce management with our comprehensive employee
-        management solution.
-      </p>
-    </div>
-
-    <div class="flex justify-center flex-col gap-5 mt-5 md:flex-row">
-      <app-button text="Get Started" variant="secondary" />
-      <app-button text="learn more" />
-    </div>
-  </section>
-
-  <section class="bg-gray-100">
-    <div
-      class="flex flex-col justify-center items-center gap-6 p-5 md:flex-row mx-auto max-w-7xl"
-    >
-      <div
-        v-for="content in marketing_content"
-        :key="content.title"
-        class="py-3"
-      >
-        <p class="capitalize font-bold text-md">{{ content.title }}</p>
-        <p class="text-sm">{{ content.description }}</p>
+  <div>
+    <section class="text-center m-16 sm:m-8 sm:p-4">
+      <div class="flex flex-col justify-center">
+        <h1 class="capitalize">employment management system</h1>
+        <p class="text-center mx-auto sm:w-full lg:w-1/2">
+          Streamline your workforce management with our comprehensive employee
+          management solution.
+        </p>
       </div>
-    </div>
-  </section>
 
-  <section>
-    <Timer />
-  </section>
+      <div class="flex justify-center flex-col gap-5 mt-5 md:flex-row">
+        <app-button text="Get Started" variant="secondary" />
+        <app-button text="learn more" />
+      </div>
+    </section>
 
-  <section class="flex justify-center mt-6">
-    <form class="w-full md:w-1/3 p-5 [&>*:not(:last-child)]:mb-5">
-      <p class="font-md capitalize text-lg">authentication</p>
-      <form-app-input
-        inputLabel="email"
-        id="email"
-        inputType="email"
-        v-model="email"
-        @update:model-value="updateEmailModelValue"
-        placeholder="johndoe@email.com"
-      />
+    <section class="bg-gray-100">
+      <div
+        class="flex flex-col justify-center items-center gap-6 p-5 md:flex-row mx-auto max-w-7xl"
+      >
+        <div
+          v-for="content in marketing_content"
+          :key="content.title"
+          class="py-3"
+        >
+          <p class="capitalize font-bold text-md">{{ content.title }}</p>
+          <p class="text-sm">{{ content.description }}</p>
+        </div>
+      </div>
+    </section>
 
-      <form-app-input
-        inputLabel="password"
-        id="password"
-        placeholder="Enter Password"
-        inputType="password"
-        v-model="password"
-        @update:model-value="updatePasswordModelValue"
-      />
-
-      <app-button
-        text="sign in"
-        variant="tertiary"
-        @click.prevent="loginWithPassword"
-        class="min-w-full"
-      />
-    </form>
-  </section>
+    <section>
+      <Timer />
+    </section>
+  </div>
 </template>
