@@ -8,6 +8,12 @@
             <li>
               <nuxt-link to="/dashboard">dashboard</nuxt-link>
             </li>
+            <li>
+              <nuxt-link to="/dashboard/profile">Profile</nuxt-link>
+            </li>
+            <li>
+              <nuxt-link to="/dashboard/organizations">Organizations</nuxt-link>
+            </li>
           </ul>
         </nav>
       </div>

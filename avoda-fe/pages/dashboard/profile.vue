@@ -37,7 +37,6 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
 import {
   Card,
   CardHeader,
@@ -45,23 +44,15 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
-import axios from 'axios';
-import { useRuntimeConfig } from '#imports';
 
 const config = useRuntimeConfig();
-const route = useRoute();
 const user = ref(null);
-
+const { get } = useApi();
 const fetchUserProfile = async () => {
   try {
-    const { id } = route.params;
-    const response = await axios.get(
-      `${config.public.BASE_URL}/organizations/${id}/members/profile`,
-      {
-        withCredentials: true,
-      }
-    );
-    user.value = response.data;
+    const response = await get(`${config.public.BASE_URL}/users/profile/me`);
+    console.log('API Response:', response);
+    user.value = response.data?.user || response.data;
   } catch (error) {
     console.error('Failed to fetch user profile:', error);
   }
