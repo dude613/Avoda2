@@ -8,6 +8,9 @@
             <li>
               <nuxt-link to="/dashboard">dashboard</nuxt-link>
             </li>
+            <li>
+              <nuxt-link to="/dashboard/invites">invites</nuxt-link>
+            </li>
           </ul>
         </nav>
       </div>

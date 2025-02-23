@@ -1,8 +1,7 @@
-import { IsArray, IsEmail, IsNotEmpty } from 'class-validator';
+import { ArrayNotEmpty, IsArray } from 'class-validator';
 
 export class InviteMembersDTO {
   @IsArray()
-  @IsEmail({}, { each: true })
-  @IsNotEmpty()
+  @ArrayNotEmpty()
   emails: string[];
 }

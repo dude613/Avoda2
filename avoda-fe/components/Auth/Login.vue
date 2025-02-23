@@ -105,7 +105,6 @@ const loginWithPassword = async () => {
   toast({
     title: 'Successful',
     description: 'Login Successful!',
-    duration: 3000,
     variant: 'default',
   });
 
