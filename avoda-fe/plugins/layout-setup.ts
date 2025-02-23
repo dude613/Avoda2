@@ -1,7 +1,7 @@
 export default defineNuxtPlugin((nuxtApp) => {
   // Set the layout based on the route
   const route = useRoute();
-  nuxtApp.hook('app:created', () => {
+  nuxtApp.hook('page:start', () => {
     if (route.path.startsWith('/auth')) {
       setPageLayout('auth'); // Use the auth layout
     } else {
