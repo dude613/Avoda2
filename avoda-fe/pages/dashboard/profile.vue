@@ -21,6 +21,14 @@
             <span class="label">Email:</span>
             <span class="value">{{ user.email }}</span>
           </div>
+          <div class="info-item" v-if="user.organizations?.length">
+            <span class="label">Organizations:</span>
+            <ul class="value">
+              <li v-for="org in user.organizations" :key="org.id">
+                {{ org.name }}
+              </li>
+            </ul>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -92,5 +100,16 @@ onMounted(fetchUserProfile);
 }
 .value {
   color: #555;
+}
+.value ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.value li {
+  background: #e0e0e0;
+  padding: 5px;
+  margin: 3px 0;
+  border-radius: 4px;
 }
 </style>
