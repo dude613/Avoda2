@@ -44,33 +44,45 @@ export const useApi = () => {
       if (error.code === 'ECONNABORTED') {
         throw new Error('Request timeout - please try again');
       }
-      if (error.response?.status === 401) {
-        token.value = null;
 
-        toast({
-          title: 'Unauthorized',
-          description: 'Session expired. Please login again!',
-          duration: 3000,
-        });
+      if (error.response) {
+        if (error.response?.status === 401) {
+          token.value = null;
 
-        setTimeout(() => {
-          router.push('/auth/login');
-        }, 1000);
-      } else if (error.response?.status === 403) {
-        // Handle 403 Forbidden errors
-        // redirect user to previous page
-        toast({
-          title: 'Forbidden',
-          description: 'You do not have permission to access this resource',
-        });
+          toast({
+            title: 'Unauthorized',
+            description: 'Session expired. Please login again!',
+          });
 
-        if (router.getRoutes().length) {
-          // take the user back to the previous page
-          router.go(-1);
-        } else {
-          router.push('/');
+          setTimeout(() => {
+            router.push('/auth/login');
+          }, 1000);
+        } else if (error.response?.status === 403) {
+          // Handle 403 Forbidden errors
+          // redirect user to previous page
+          toast({
+            title: 'Forbidden',
+            description: 'You do not have permission to access this resource',
+          });
+
+          if (router.getRoutes().length) {
+            // take the user back to the previous page
+            router.go(-1);
+          } else {
+            router.push('/');
+          }
         }
+
+        return Promise.reject({
+          status: error.response.status,
+          message: error.response.data?.message || 'An error occurred',
+          data:
+            error.response.data.data instanceof Array
+              ? error.response.data.data[0]
+              : error.response.data,
+        });
       }
+
       return Promise.reject(error);
     }
   );
