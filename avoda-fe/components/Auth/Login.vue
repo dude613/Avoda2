@@ -69,6 +69,8 @@
 </template>
 
 <script setup lang="ts">
+import { useToast } from '@/components/ui/toast/use-toast';
+
 import Google from '@/components/icons/google.vue';
 const runTimeConfig = useRuntimeConfig();
 const { post } = useApi();
@@ -76,6 +78,8 @@ const { post } = useApi();
 const email = ref('');
 const password = ref('');
 const router = useRouter();
+
+const { toast } = useToast();
 
 const loginWithPassword = async () => {
   const data = await post<any>(
@@ -97,6 +101,14 @@ const loginWithPassword = async () => {
   useLocalStorage('REFRESH_TOKEN', data.data.tokens.refreshToken, {
     flush: 'sync',
   });
+
+  toast({
+    title: 'Successful',
+    description: 'Login Successful!',
+    duration: 3000,
+    variant: 'default',
+  });
+
   router.push('/');
 };
 </script>

@@ -8,11 +8,7 @@ export const useApi = () => {
   const router = useRouter();
   const { toast } = useToast();
 
-  const token = ref<string | null>(null);
-
-  if (import.meta.client) {
-    token.value = localStorage.getItem('ACCESS_TOKEN');
-  }
+  const token = useLocalStorage('ACCESS_TOKEN', null);
 
   const authHeader = computed(() => {
     return token.value ? `Bearer ${token.value}` : null;
@@ -50,11 +46,16 @@ export const useApi = () => {
       }
       if (error.response?.status === 401) {
         token.value = null;
+
         toast({
           title: 'Unauthorized',
           description: 'Session expired. Please login again!',
+          duration: 3000,
         });
-        router.push('/');
+
+        setTimeout(() => {
+          router.push('/auth/login');
+        }, 1000);
       } else if (error.response?.status === 403) {
         // Handle 403 Forbidden errors
         // redirect user to previous page
