@@ -10,7 +10,8 @@ export const useUserStore = defineStore('user-store', () => {
 
         return JSON.parse(jsonString) as User;
       } catch {
-        throw new Error(`Could not parse user data`);
+        console.log(`Could not parse user data`);
+        return null;
       }
     },
     set: (val) => useLocalStorage('USER_DATA', val),

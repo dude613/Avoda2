@@ -118,7 +118,7 @@ onMounted(async () => {
                   <SelectGroup>
                     <SelectLabel>Organizations</SelectLabel>
                     <SelectItem
-                      v-for="item in organizations?.data"
+                      v-for="item in organizations"
                       :value="item.id"
                       :key="item.id"
                     >
