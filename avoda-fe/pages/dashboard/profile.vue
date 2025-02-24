@@ -21,15 +21,22 @@
             <span class="label">Email:</span>
             <span class="value">{{ user.email }}</span>
           </div>
+          <div class="info-item" v-if="user.organizations?.length">
+            <span class="label">Organizations:</span>
+            <ul class="value">
+              <li v-for="org in user.organizations" :key="org.id">
+                {{ org.name }}
+              </li>
+            </ul>
+          </div>
         </div>
       </CardContent>
     </Card>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
 import {
   Card,
   CardHeader,
@@ -37,23 +44,30 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
-import axios from 'axios';
-import { useRuntimeConfig } from '#imports';
 
 const config = useRuntimeConfig();
-const route = useRoute();
-const user = ref(null);
+const { get } = useApi();
+
+interface Organization {
+  id: number;
+  name: string;
+}
+
+interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  organizations?: Organization[];
+}
+
+const user = ref<User | null>(null);
 
 const fetchUserProfile = async () => {
   try {
-    const { id } = route.params;
-    const response = await axios.get(
-      `${config.public.BASE_URL}/organizations/${id}/members/profile`,
-      {
-        withCredentials: true,
-      }
-    );
-    user.value = response.data;
+    const response = await get(`/users/profile/me`);
+    console.log('API Response:', response);
+    user.value = response.data?.user;
   } catch (error) {
     console.error('Failed to fetch user profile:', error);
   }
@@ -92,5 +106,16 @@ onMounted(fetchUserProfile);
 }
 .value {
   color: #555;
+}
+.value ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.value li {
+  background: #e0e0e0;
+  padding: 5px;
+  margin: 3px 0;
+  border-radius: 4px;
 }
 </style>
