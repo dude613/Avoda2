@@ -35,7 +35,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import {
   Card,
@@ -46,13 +46,28 @@ import {
 } from '@/components/ui/card';
 
 const config = useRuntimeConfig();
-const user = ref(null);
 const { get } = useApi();
+
+interface Organization {
+  id: number;
+  name: string;
+}
+
+interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  organizations?: Organization[];
+}
+
+const user = ref<User | null>(null);
+
 const fetchUserProfile = async () => {
   try {
-    const response = await get(`${config.public.BASE_URL}/users/profile/me`);
+    const response = await get(`/users/profile/me`);
     console.log('API Response:', response);
-    user.value = response.data?.user || response.data;
+    user.value = response.data?.user;
   } catch (error) {
     console.error('Failed to fetch user profile:', error);
   }

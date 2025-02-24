@@ -34,7 +34,7 @@
     "@nuxtjs/color-mode": "^3.5.2",
     "@typescript-eslint/eslint-plugin": "^8.21.0",
     "@typescript-eslint/parser": "^8.21.0",
-    "@vueuse/core": "^12.6.1",
+    "@vueuse/core": "^12.7.0",
     "@vueuse/nuxt": "^12.6.1",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
