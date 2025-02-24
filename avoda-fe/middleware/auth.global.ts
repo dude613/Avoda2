@@ -14,7 +14,6 @@ export default defineNuxtRouteMiddleware((to) => {
       toast({
         title: 'Unauthorized',
         description: 'Session expired. Please login again!',
-        duration: 3000,
       });
 
       return navigateTo('/auth/login');
