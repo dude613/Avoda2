@@ -72,6 +72,8 @@
 import { useToast } from '@/components/ui/toast/use-toast';
 
 import Google from '@/components/icons/google.vue';
+import type { User } from '~/types/user.type';
+
 const runTimeConfig = useRuntimeConfig();
 const { post } = useApi();
 
@@ -89,18 +91,14 @@ const loginWithPassword = async () => {
       password: password.value,
     }
   );
-  console.log(data.data, 'data...');
 
-  useLocalStorage('USER_DATA', data.data.user, {
-    flush: 'sync',
-    deep: true,
-  });
-  useLocalStorage('ACCESS_TOKEN', data.data.tokens.accessToken, {
-    flush: 'sync',
-  });
-  useLocalStorage('REFRESH_TOKEN', data.data.tokens.refreshToken, {
-    flush: 'sync',
-  });
+  const userStore = useUserStore();
+
+  userStore.user = data.data.user;
+
+  userStore.accessToken = data.data.tokens.accessToken;
+
+  userStore.refreshToken = data.data.tokens.refreshToken;
 
   toast({
     title: 'Successful',

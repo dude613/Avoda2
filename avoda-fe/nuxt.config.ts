@@ -3,7 +3,15 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   // css: ['~/assets/css/main.css'],
-  modules: ['@vueuse/nuxt', '@nuxtjs/tailwindcss', 'shadcn-nuxt'],
+  modules: [
+    '@vueuse/nuxt',
+    '@nuxtjs/tailwindcss',
+    'shadcn-nuxt',
+    '@pinia/nuxt',
+  ],
+  pinia: {
+    storesDirs: ['./stores/**'],
+  },
   shadcn: {
     /**
      * Prefix for all the imported component

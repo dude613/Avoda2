@@ -11,6 +11,9 @@
             <li>
               <nuxt-link to="/dashboard/invites">invites</nuxt-link>
             </li>
+            <li>
+              <nuxt-link to="/dashboard/organizations">organizations</nuxt-link>
+            </li>
           </ul>
         </nav>
       </div>

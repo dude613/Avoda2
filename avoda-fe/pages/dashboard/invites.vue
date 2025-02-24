@@ -29,7 +29,7 @@ import {
 import * as z from 'zod';
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
-import { useToast } from '~/components/ui/toast';
+import { useToast } from '@/components/ui/toast';
 
 const formSchema = toTypedSchema(
   z.object({
@@ -43,27 +43,9 @@ const formSchema = toTypedSchema(
   })
 );
 
-const organizationSchema = z.object({
-  data: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-      rate: z.optional(z.number()),
-      isDefaultOrg: z.number(),
-      createdAt: z.string(z.date()),
-      updatedAt: z.string(z.date()),
-      roles: z.enum(['OWNER', 'MEMBER']),
-    })
-  ),
-});
+const { put } = useApi();
 
-type Organization = z.infer<typeof organizationSchema>;
-
-const { put, get } = useApi();
-
-const orgs = ref<Organization>();
-
-const { handleSubmit, setFieldValue } = useForm({
+const { handleSubmit, setFieldValue, resetField } = useForm({
   validationSchema: formSchema,
   initialValues: {
     emails: [],
@@ -81,6 +63,10 @@ const onSubmit = handleSubmit(async ({ emails, id }) => {
       title: 'Invitation sent',
       description: 'Invitation has been sent successfully',
     });
+
+    // Reset form fields
+    resetField('emails');
+    resetField('id');
   } catch {
     toast({
       title: 'Invitation Failed',
@@ -88,11 +74,15 @@ const onSubmit = handleSubmit(async ({ emails, id }) => {
     });
   }
 });
+const organizationStore = useOrganizationStore();
+
+const { fetchOrganizationsForCurrentUser } = organizationStore;
+
+const { organizations } = storeToRefs(organizationStore);
 
 onMounted(async () => {
   try {
-    const data = await get<Organization>('/organizations/me/organizations');
-    orgs.value = data;
+    await fetchOrganizationsForCurrentUser();
   } catch {
     toast({
       title: 'Failed to fetch organizations',
@@ -110,12 +100,8 @@ onMounted(async () => {
       </CardHeader>
       <form @submit.prevent="onSubmit">
         <CardContent>
-          <FormField
-            v-slot="{ componentField, value }"
-            name="organizations"
-            class="mb-5"
-          >
-            <FormItem>
+          <FormField v-slot="{ componentField, value }" name="id">
+            <FormItem class="mb-5">
               <FormLabel>Organizations</FormLabel>
 
               <Select
@@ -132,7 +118,7 @@ onMounted(async () => {
                   <SelectGroup>
                     <SelectLabel>Organizations</SelectLabel>
                     <SelectItem
-                      v-for="item in orgs?.data"
+                      v-for="item in organizations?.data"
                       :value="item.id"
                       :key="item.id"
                     >

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@nuxtjs/tailwindcss": "6.13.1",
+    "@pinia/nuxt": "0.10.1",
     "@tailwindcss/vite": "^4.0.0",
     "@vee-validate/zod": "^4.15.0",
     "axios": "^1.7.9",
