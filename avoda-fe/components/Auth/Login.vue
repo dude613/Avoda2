@@ -72,7 +72,6 @@
 import { useToast } from '@/components/ui/toast/use-toast';
 
 import Google from '@/components/icons/google.vue';
-import type { User } from '~/types/user.type';
 
 const runTimeConfig = useRuntimeConfig();
 const { post } = useApi();
