@@ -20,6 +20,11 @@ import { TimeLogService } from '../services/time-log.service';
 export class TimeLogController {
   constructor(private readonly timeLogService: TimeLogService) {}
 
+  @Get('/active')
+  getActiveTimerPerUser(@CurrentUser() user: Partial<User>) {
+    return this.timeLogService.getActiveTimerPerUser(user.id);
+  }
+
   @Get('/:logId')
   getTimeLogById(@Param('logId') id: string) {
     return this.timeLogService.getTimeLogById(id);

@@ -8,8 +8,7 @@
         <Plus :size="32" />create new organization
       </Button>
 
-      <!-- <Form v-slot="{ handleSubmit }" :validation-schema="formSchema"> -->
-      <Dialog modal :open="isDialogOpen" :hideClose="true">
+      <Dialog modal :open="isDialogOpen">
         <DialogContent class="sm:max-w-[425px] [&>button]:hidden">
           <DialogHeader>
             <div class="flex justify-between items-center w-full">
@@ -55,27 +54,67 @@
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <!-- </Form> -->
     </div>
 
     <div class="grid items-center justify-center gap-3 grid-cols-3">
       <Card v-for="item in organizations" :key="item.id">
-        <nuxt-link :to="`organizations/${item.id}`">
-          <CardHeader class="text-wrap">
-            <CardTitle>{{ item.name }}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CardDescription>
-              <div>{{ item.name }}</div>
-              <div v-for="i in item.roles" :key="i">
-                <span class="capitalize">{{ i }}</span>
-              </div>
-            </CardDescription>
-          </CardContent>
-          <CardFooter class="capitalize">
-            created at: {{ item.createdAt }}
-          </CardFooter>
-        </nuxt-link>
+        <CardHeader>
+          <div class="text-wrap flex justify-between align-center">
+            <nuxt-link :to="`organizations/${item.id}`">
+              <CardTitle>{{ item.name }}</CardTitle>
+            </nuxt-link>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger as-child>
+                <Button variant="ghost" type="button">
+                  <LucideEllipsisVertical :size="24" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent>
+                <DropdownMenuItem as-child>
+                  <AlertDialog>
+                    <AlertDialogTrigger as-child>
+                      <Button variant="ghost" type="button">
+                        <LucideTrash :size="24" color="red" />
+                        <span class="text-red-500">Delete Organization</span>
+                      </Button>
+                    </AlertDialogTrigger>
+
+                    <AlertDialogContent class="w-[400px]">
+                      <DialogTitle>Delete organization</DialogTitle>
+                      <DialogDescription>
+                        Are you sure you want to delete
+                        <b>{{ item.name }}</b> organization?
+                      </DialogDescription>
+
+                      <AlertDialogFooter>
+                        <AlertDialogCancel> Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          @click="deleteOrganizationById(item.id)"
+                        >
+                          Continue
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          <CardDescription>
+            <div>{{ item.name }}</div>
+            <div v-for="i in item.roles" :key="i">
+              <span class="capitalize">{{ i }}</span>
+            </div>
+          </CardDescription>
+        </CardContent>
+        <CardFooter class="capitalize">
+          created at: {{ item.createdAt }}
+        </CardFooter>
       </Card>
     </div>
   </div>
@@ -85,7 +124,12 @@
 import { z } from 'zod';
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
-import { LucideX, Plus } from 'lucide-vue-next';
+import {
+  LucideEllipsisVertical,
+  LucideTrash,
+  LucideX,
+  Plus,
+} from 'lucide-vue-next';
 
 import { useToast } from '@/components/ui/toast';
 import {
@@ -108,6 +152,20 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '~/components/ui/input';
 import type { ResponseObject } from '~/types/response-object.interface';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '~/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogTrigger,
+} from '~/components/ui/alert-dialog';
 
 const organizationStore = useOrganizationStore();
 const userStore = useUserStore();
@@ -153,7 +211,7 @@ const { handleSubmit, resetField } = useForm({
   },
 });
 
-const { post } = useApi();
+const { post, delete: del } = useApi();
 
 const onSubmit = handleSubmit(async ({ organization_name }) => {
   try {
@@ -177,4 +235,16 @@ const onSubmit = handleSubmit(async ({ organization_name }) => {
     });
   }
 });
+
+const deleteOrganizationById = async (id: string) => {
+  const response = await del<ResponseObject<string>>(`/organizations/${id}`);
+
+  toast({
+    title: 'Organization deleted',
+    description: response.data,
+  });
+
+  // refresh the page to fetch organizations
+  await fetchOrganizationsForCurrentUser();
+};
 </script>

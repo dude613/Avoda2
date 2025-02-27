@@ -28,6 +28,18 @@ export class TimeLogService {
     return entry;
   }
 
+  async getActiveTimerPerUser(id: string) {
+    const activeLog = await this.timeLogRepository.findOne({
+      where: {
+        user: { id },
+        status: In([TimeLogStatus.STARTED, TimeLogStatus.PAUSED]),
+      },
+      order: { createdAt: 'DESC' },
+    });
+
+    return activeLog;
+  }
+
   async startTime(user: Partial<User>) {
     return await this.timeLogRepository.manager.transaction(async (tnx) => {
       // Check for existing active time logs
@@ -80,7 +92,9 @@ export class TimeLogService {
       const lastActiveAt = entry.lastPausedAt ?? entry.startTime;
 
       // Calculate active time since last start/resume
-      const activeTimeSinceLastAction = now.getTime() - lastActiveAt.getTime();
+      const activeTimeSinceLastAction = Math.floor(
+        (now.getTime() - lastActiveAt.getTime()) / 1000
+      );
 
       /**
          * How activeTime Works
@@ -117,8 +131,9 @@ export class TimeLogService {
       }
 
       if (entry.lastPausedAt) {
-        const pauseDuration =
-          new Date().getTime() - entry.lastPausedAt.getTime();
+        const pauseDuration = Math.floor(
+          (new Date().getTime() - entry.lastPausedAt.getTime()) / 1000
+        );
         entry.totalPausedTime += pauseDuration;
       }
 
@@ -140,14 +155,17 @@ export class TimeLogService {
       // If it was running, calculate final active time
       if (entry.status === TimeLogStatus.STARTED) {
         const lastActiveAt = entry.lastPausedAt ?? entry.startTime;
-        const activeTimeSinceLastAction =
-          now.getTime() - lastActiveAt.getTime();
+        const activeTimeSinceLastAction = Math.floor(
+          (now.getTime() - lastActiveAt.getTime()) / 1000
+        );
         entry.activeTime += activeTimeSinceLastAction;
       }
 
       // If it was paused, add to total paused time
       else if (entry.lastPausedAt) {
-        const pauseDuration = now.getTime() - entry.lastPausedAt.getTime();
+        const pauseDuration = Math.floor(
+          (now.getTime() - entry.lastPausedAt.getTime()) / 1000
+        );
         entry.totalPausedTime += pauseDuration;
       }
 
