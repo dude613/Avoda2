@@ -8,10 +8,10 @@ export const useApi = () => {
   const router = useRouter();
   const { toast } = useToast();
 
-  const token = useLocalStorage('ACCESS_TOKEN', null);
+  const savedToken = useLocalStorage('ACCESS_TOKEN', null);
 
-  const authHeader = computed(() => {
-    return token.value ? `Bearer ${token.value}` : null;
+  const token = computed(() => {
+    return savedToken.value ? `Bearer ${savedToken.value}` : null;
   });
 
   // Create axios instance with default config
@@ -28,8 +28,8 @@ export const useApi = () => {
   api.interceptors.request.use(
     (config) => {
       // Add auth token if it exists
-      if (authHeader.value) {
-        config.headers.Authorization = authHeader.value;
+      if (token.value) {
+        config.headers.Authorization = token.value;
       }
       return config;
     },
@@ -47,7 +47,7 @@ export const useApi = () => {
 
       if (error.response) {
         if (error.response?.status === 401) {
-          token.value = null;
+          savedToken.value = null;
 
           toast({
             title: 'Unauthorized',
@@ -64,13 +64,6 @@ export const useApi = () => {
             title: 'Forbidden',
             description: 'You do not have permission to access this resource',
           });
-
-          if (router.getRoutes().length) {
-            // take the user back to the previous page
-            router.go(-1);
-          } else {
-            router.push('/');
-          }
         }
 
         return Promise.reject({
